@@ -708,6 +708,85 @@ body {
   color: var(--neutral);
 }
 
+/* --- Locked Amenity Chip --- */
+.amenity-chip.locked {
+  cursor: default;
+  pointer-events: none;
+  position: relative;
+  background: rgba(14, 10, 20, 0.6);
+  border-style: dashed;
+}
+.amenity-chip.locked .amenity-lock-toggle {
+  pointer-events: auto;
+}
+.amenity-chip.locked .amenity-name {
+  text-decoration: line-through;
+  text-decoration-color: var(--text-muted);
+  opacity: 0.4;
+}
+.amenity-chip.locked .amenity-effects {
+  opacity: 0.35;
+}
+.amenity-chip.locked .amenity-impact {
+  display: none;
+}
+
+/* --- Amenity Lock Toggle --- */
+.amenity-lock-toggle {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.amenity-chip:hover .amenity-lock-toggle,
+.amenity-chip:focus-within .amenity-lock-toggle,
+.amenity-lock-toggle:focus-visible {
+  opacity: 1;
+}
+.amenity-chip.locked .amenity-lock-toggle {
+  opacity: 1;
+  background: var(--accent-red-dark, #5a1020);
+  border-color: var(--accent-red, #8b1a3a);
+  color: var(--text-heading);
+}
+
+/* --- Amenity Unlock Info --- */
+.amenity-unlock-info {
+  margin-top: var(--space-sm);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.unlock-req-text {
+  font-style: italic;
+  color: var(--text-primary);
+}
+.unlock-wowhead-link {
+  color: var(--accent-gold);
+  text-decoration: none;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+.unlock-wowhead-link:hover {
+  text-decoration: underline;
+}
+
 /* ==========================================================
    OPTIMIZE BUTTON
    ========================================================== */
@@ -1103,6 +1182,13 @@ body {
     width: 28px;
     height: 28px;
     font-size: 0.75rem;
+  }
+
+  .amenity-lock-toggle {
+    opacity: 0.7;
+  }
+  .amenity-chip.locked .amenity-lock-toggle {
+    opacity: 1;
   }
 }
 
