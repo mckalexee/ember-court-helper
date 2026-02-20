@@ -1568,7 +1568,7 @@ body {
     width: 28px;
     height: 28px;
   }
-  .reward-collection-guest {
+  .reward-collection-row .reward-requirement {
     display: none;
   }
   .reward-category {
@@ -1600,12 +1600,24 @@ body {
     width: 20px;
     height: 20px;
   }
+  .reward-row .reward-requirement {
+    display: none;
+  }
+  .reward-row {
+    grid-template-columns: 24px 1fr 24px;
+  }
   .reward-collection-row {
-    grid-template-columns: 24px 1fr auto 24px;
+    grid-template-columns: 24px 1fr 24px;
   }
   .reward-collection-row .reward-row-icon {
     width: 24px;
     height: 24px;
+  }
+  .reward-collection-guest {
+    display: none;
+  }
+  .reward-collection-row .reward-requirement {
+    display: none;
   }
   .reward-collection-name {
     font-size: 0.78rem;
