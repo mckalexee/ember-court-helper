@@ -1207,7 +1207,7 @@ body {
 
 .reward-row {
   display: grid;
-  grid-template-columns: 28px 1fr auto 28px;
+  grid-template-columns: 28px minmax(0, 1fr) auto 28px;
   gap: var(--space-sm);
   align-items: center;
   padding: 6px 0;
@@ -1242,7 +1242,6 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  min-width: 0;
 }
 
 /* Wowhead links on reward names */
@@ -1360,7 +1359,7 @@ body {
 
 .reward-collection-row {
   display: grid;
-  grid-template-columns: 32px 1fr auto auto 28px;
+  grid-template-columns: 32px minmax(0, 1fr) auto auto 28px;
   gap: var(--space-sm);
   align-items: center;
   padding: 8px 0;
@@ -1385,7 +1384,6 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  min-width: 0;
 }
 
 .reward-collection-guest {
@@ -1554,7 +1552,7 @@ body {
   }
 
   .reward-row {
-    grid-template-columns: 24px 1fr auto 24px;
+    grid-template-columns: 24px minmax(0, 1fr) auto 24px;
     font-size: 0.8rem;
   }
   .reward-row-icon {
@@ -1563,7 +1561,7 @@ body {
   }
 
   .reward-collection-row {
-    grid-template-columns: 28px 1fr auto 28px;
+    grid-template-columns: 28px minmax(0, 1fr) auto 28px;
     gap: var(--space-xs);
   }
   .reward-collection-row .reward-row-icon {
@@ -1606,10 +1604,10 @@ body {
     display: none;
   }
   .reward-row {
-    grid-template-columns: 24px 1fr 24px;
+    grid-template-columns: 24px minmax(0, 1fr) 24px;
   }
   .reward-collection-row {
-    grid-template-columns: 24px 1fr 24px;
+    grid-template-columns: 24px minmax(0, 1fr) 24px;
   }
   .reward-collection-row .reward-row-icon {
     width: 24px;
