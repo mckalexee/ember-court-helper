@@ -829,7 +829,7 @@ const App = (() => {
       html += '<span class="reward-row-name">' + typeLabel + ' ' + nameHtml + '</span>';
       html += r.requirement && r.requirement !== "Any"
         ? '<span class="reward-requirement">' + r.requirement + '</span>'
-        : '<span></span>';
+        : '<span class="reward-requirement"></span>';
       html += '<button class="reward-collect-btn" data-reward="' + r.id + '" role="checkbox" aria-checked="' + collected + '" aria-label="' + (collected ? "Unmark " : "Mark ") + r.name + ' as collected" tabindex="0">';
       html += '<span class="reward-checkbox"></span>';
       html += '</button>';
@@ -887,7 +887,7 @@ const App = (() => {
         html += '<span class="reward-collection-guest ' + fc + '">' + guest.name + '</span>';
         html += r.requirement && r.requirement !== "Any"
           ? '<span class="reward-requirement">' + r.requirement + '</span>'
-          : '<span></span>';
+          : '<span class="reward-requirement"></span>';
         html += '<button class="reward-collect-btn" data-reward="' + r.id + '" role="checkbox" aria-checked="' + collected + '" aria-label="Mark ' + r.name + ' as collected" tabindex="0">';
         html += '<span class="reward-checkbox"></span>';
         html += '</button>';
