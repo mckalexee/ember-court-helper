@@ -33,6 +33,13 @@
   --negative:        #e53935;
   --neutral:         #78748c;
 
+  /* Dimension colours */
+  --dim-cleanliness: #4dd0c8;
+  --dim-danger:      #e8913a;
+  --dim-decadence:   #c77dff;
+  --dim-excitement:  #f5d26b;
+  --dim-formality:   #6ba3d9;
+
   /* Faction colours */
   --faction-venthyr:  #c62d5b;
   --faction-necrolord:#6bbd5b;
@@ -332,10 +339,11 @@ body {
   white-space: nowrap;
 }
 
-.guest-card.selected .pref-tag {
-  background: rgba(212, 168, 67, 0.12);
-  color: var(--accent-gold-light);
-}
+.pref-tag.dim-cleanliness { color: var(--dim-cleanliness); background: rgba(77, 208, 200, 0.10); }
+.pref-tag.dim-danger      { color: var(--dim-danger);      background: rgba(232, 145, 58, 0.10); }
+.pref-tag.dim-decadence   { color: var(--dim-decadence);   background: rgba(199, 125, 255, 0.10); }
+.pref-tag.dim-excitement  { color: var(--dim-excitement);   background: rgba(245, 210, 107, 0.10); }
+.pref-tag.dim-formality   { color: var(--dim-formality);    background: rgba(107, 163, 217, 0.10); }
 
 /* Conflicting preference tag */
 .pref-tag.conflict {
@@ -692,14 +700,11 @@ body {
   border-radius: 10px;
   white-space: nowrap;
 }
-.effect-tag.positive {
-  background: rgba(76, 175, 80, 0.15);
-  color: var(--positive);
-}
-.effect-tag.negative {
-  background: rgba(229, 57, 53, 0.15);
-  color: var(--negative);
-}
+.effect-tag.dim-cleanliness { background: rgba(77, 208, 200, 0.15); color: var(--dim-cleanliness); }
+.effect-tag.dim-danger      { background: rgba(232, 145, 58, 0.15); color: var(--dim-danger); }
+.effect-tag.dim-decadence   { background: rgba(199, 125, 255, 0.15); color: var(--dim-decadence); }
+.effect-tag.dim-excitement  { background: rgba(245, 210, 107, 0.15); color: var(--dim-excitement); }
+.effect-tag.dim-formality   { background: rgba(107, 163, 217, 0.15); color: var(--dim-formality); }
 
 /* Impact indicator on chips */
 .amenity-impact {
@@ -943,9 +948,12 @@ body {
 .atmo-dim-value {
   font-weight: 700;
 }
-.atmo-dim-value.positive { color: var(--positive); }
-.atmo-dim-value.negative { color: var(--negative); }
-.atmo-dim-value.zero     { color: var(--neutral); }
+.atmo-dim-value.dim-cleanliness { color: var(--dim-cleanliness); }
+.atmo-dim-value.dim-danger      { color: var(--dim-danger); }
+.atmo-dim-value.dim-decadence   { color: var(--dim-decadence); }
+.atmo-dim-value.dim-excitement  { color: var(--dim-excitement); }
+.atmo-dim-value.dim-formality   { color: var(--dim-formality); }
+.atmo-dim-value.dim-neutral     { color: var(--neutral); }
 
 /* --- Per-Guest Breakdown Cards --- */
 .results-guests {
@@ -1109,6 +1117,13 @@ body {
   font-size: 0.8rem;
   border-top: 1px solid var(--border-color);
 }
+
+/* --- Dimension color utility classes --- */
+.dim-cleanliness { color: var(--dim-cleanliness); }
+.dim-danger      { color: var(--dim-danger); }
+.dim-decadence   { color: var(--dim-decadence); }
+.dim-excitement  { color: var(--dim-excitement); }
+.dim-formality   { color: var(--dim-formality); }
 
 /* --- Utility classes --- */
 .visually-hidden {

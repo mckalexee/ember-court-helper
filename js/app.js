@@ -738,7 +738,7 @@ const App = (() => {
             if (v === 0) return "";
             const label = prefLabel(dim, v);
             const hasConflict = isSelected && conflictingDims.has(dim);
-            return `<span class="pref-tag ${hasConflict ? "conflict" : ""}">${label}</span>`;
+            return `<span class="pref-tag dim-${dim} ${hasConflict ? "conflict" : ""}">${label}</span>`;
           })
           .join("");
 
@@ -1106,7 +1106,7 @@ const App = (() => {
                 ${effectTags
                   .map(
                     (t) =>
-                      '<span class="effect-tag positive">' + t.label + "</span>"
+                      '<span class="effect-tag dim-' + t.dim + '">' + t.label + "</span>"
                   )
                   .join("")}
               </div>
@@ -1199,20 +1199,20 @@ const App = (() => {
       const val = netAtmosphere[dim];
       const labels = DATA.dimensionLabels[dim];
       let displayLabel = "";
-      let valClass = "zero";
+      let valClass = "dim-neutral";
 
       if (val > 0) {
         displayLabel = labels.positive;
-        valClass = "positive";
+        valClass = "dim-" + dim;
       } else if (val < 0) {
         displayLabel = labels.negative;
-        valClass = "negative";
+        valClass = "dim-" + dim;
       } else {
         displayLabel = "Neutral";
       }
 
       const absVal = Math.abs(val);
-      const prefix = val > 0 ? "+" : val < 0 ? "-" : "";
+      const prefix = val !== 0 ? "+" : "";
 
       html += `
             <div class="atmo-dim">
@@ -1292,7 +1292,7 @@ const App = (() => {
         html += `
             <li class="result-dim-item">
               <span class="result-dim-icon ${iconClass}">${iconStr}</span>
-              <span class="result-dim-label">Wants <strong>${prefLbl}</strong> &mdash; Court: ${netLabel}</span>
+              <span class="result-dim-label">Wants <strong class="dim-${dim}">${prefLbl}</strong> &mdash; Court: <span class="dim-${dim}">${netLabel}</span></span>
               <span class="result-dim-value ${valueClass}">${valueStr}</span>
             </li>`;
       });

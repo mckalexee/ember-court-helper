@@ -4,6 +4,23 @@ A running log of features built for the Ember Court Calculator.
 
 ---
 
+## 006 -- Dimension Colors (2026-02-20)
+
+Added per-dimension colors to all atmosphere dimension labels throughout the UI.
+Each of the 5 dimensions (Cleanliness, Danger, Decadence, Excitement, Formality)
+now has a distinct color -- teal, orange, violet, amber, and steel blue
+respectively. Colors apply to guest preference tags, amenity effect tags, Net
+Atmosphere values, and guest breakdown labels. Fixed the Net Atmosphere display
+to show intensity rather than polarity: values like "-1 Messy" are now "+1 Messy"
+since the sign indicates intensity of the displayed quality, not good/bad. Net
+Atmosphere values use dimension colors instead of green/red, which previously
+implied a judgment that only applies relative to individual guest preferences.
+Match/conflict scoring (+1/-1 with checkmark/X) retains green/red coloring.
+
+Docs: `features/006-dimension-colors/`
+
+---
+
 ## 005 -- Slot-Based Locking (2026-02-20)
 
 Changed guest locking from per-guest to per-slot. Locks now apply to the RSVP
