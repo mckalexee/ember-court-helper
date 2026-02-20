@@ -4,6 +4,19 @@ A running log of features built for the Ember Court Calculator.
 
 ---
 
+## 005 -- Slot-Based Locking (2026-02-20)
+
+Changed guest locking from per-guest to per-slot. Locks now apply to the RSVP
+slot position rather than a specific guest, matching the user mental model of
+"don't change this slot." The lock icon moved from inside the guest card to the
+slot header row next to the RSVP label. Locked slots show a gold left-border on
+the selected card. Switching guests within a locked slot preserves the lock;
+deselecting auto-unlocks. Includes migration from the old lockedGuests format.
+
+Docs: `features/005-slot-locking/`
+
+---
+
 ## 004 -- Guest Reward Tracking (2026-02-20)
 
 Added reward data and collection tracking for all 16 guests (44 total rewards:

@@ -27,8 +27,8 @@ const App = (() => {
     security: null,
   };
 
-  // Set of guest IDs the user has locked (persisted to localStorage)
-  let lockedGuests = new Set();
+  // Set of slot indices the user has locked (persisted to localStorage)
+  let lockedSlots = new Set();
 
   // Set of amenity IDs the user has NOT unlocked (persisted to localStorage)
   let lockedAmenities = new Set();
@@ -383,7 +383,7 @@ const App = (() => {
 
     selectedGuests.forEach((guestId, slotIndex) => {
       if (!guestId) return;
-      if (lockedGuests.has(guestId)) return;
+      if (lockedSlots.has(slotIndex)) return;
 
       const slot = DATA.slots[slotIndex];
 
@@ -462,7 +462,7 @@ const App = (() => {
       const state = {
         selectedGuests,
         selectedAmenities,
-        lockedGuests: Array.from(lockedGuests),
+        lockedSlots: Array.from(lockedSlots),
         lockedAmenities: Array.from(lockedAmenities),
         collectedRewards: Array.from(collectedRewards),
       };
@@ -488,14 +488,18 @@ const App = (() => {
           }
         }
       }
-      if (Array.isArray(state.lockedGuests)) {
-        lockedGuests = new Set(state.lockedGuests);
-        // Clean up: remove locks for guests that are no longer selected
-        lockedGuests.forEach((gId) => {
-          if (!selectedGuests.includes(gId)) {
-            lockedGuests.delete(gId);
+      // Migration: lockedGuests (guest IDs) -> lockedSlots (slot indices)
+      if (Array.isArray(state.lockedGuests) && state.lockedGuests.length > 0 && !Array.isArray(state.lockedSlots)) {
+        state.lockedGuests.forEach((guestId) => {
+          const slotIndex = selectedGuests.indexOf(guestId);
+          if (slotIndex !== -1) {
+            lockedSlots.add(slotIndex);
           }
         });
+        saveState();
+      }
+      if (Array.isArray(state.lockedSlots)) {
+        lockedSlots = new Set(state.lockedSlots);
       }
       if (Array.isArray(state.lockedAmenities)) {
         lockedAmenities = new Set(state.lockedAmenities);
@@ -516,7 +520,7 @@ const App = (() => {
       decoration: null,
       security: null,
     };
-    lockedGuests = new Set();
+    lockedSlots = new Set();
     lockedAmenities = new Set();
     showingSuggestions = false;
     replacementSuggestions = [];
@@ -532,9 +536,9 @@ const App = (() => {
 
   function handleGuestClick(slotIndex, guestId) {
     if (selectedGuests[slotIndex] === guestId) {
-      // Deselect -- also remove lock
+      // Deselect -- auto-unlock the slot
       selectedGuests[slotIndex] = null;
-      lockedGuests.delete(guestId);
+      lockedSlots.delete(slotIndex);
     } else {
       selectedGuests[slotIndex] = guestId;
     }
@@ -689,9 +693,24 @@ const App = (() => {
         </div>`;
 
     DATA.slots.forEach((slot, slotIndex) => {
+      const slotHasGuest = selectedGuests[slotIndex] !== null;
+      const slotIsLocked = lockedSlots.has(slotIndex);
+
+      // Lock toggle in slot header (only shown when a guest is selected)
+      const slotLockHtml = slotHasGuest
+        ? `<div class="slot-lock ${slotIsLocked ? "locked" : ""}"
+                data-slot="${slotIndex}"
+                role="checkbox" aria-checked="${slotIsLocked}"
+                aria-label="${slotIsLocked ? "Unlock" : "Lock"} ${slot.name}"
+                tabindex="0"
+                title="${slotIsLocked ? "Locked -- click to unlock" : "Click to lock -- locked slots won't be suggested for replacement"}">
+              ${slotIsLocked ? LOCK_CLOSED_SVG : LOCK_OPEN_SVG}
+            </div>`
+        : "";
+
       html += `
-        <div class="slot-row">
-          <div class="slot-label">RSVP ${slot.name}</div>
+        <div class="slot-row${slotIsLocked ? " locked" : ""}">
+          <div class="slot-label">RSVP ${slot.name}${slotLockHtml}</div>
           <div class="slot-guests">`;
 
       slot.guestIds.forEach((guestId) => {
@@ -699,7 +718,6 @@ const App = (() => {
         if (!guest) return;
 
         const isSelected = selectedGuests[slotIndex] === guestId;
-        const isLocked = lockedGuests.has(guestId);
         const portraitImg = `<img src="img/guests/${guestId}.png" alt="${guest.name}" width="128" height="128" loading="lazy">`;
 
         // Compute conflicts for this guest
@@ -719,18 +737,6 @@ const App = (() => {
           })
           .join("");
 
-        // Lock toggle (only on selected cards)
-        const lockHtml = isSelected
-          ? `<div class="guest-lock ${isLocked ? "locked" : ""}"
-                 data-slot="${slotIndex}" data-guest="${guestId}"
-                 role="checkbox" aria-checked="${isLocked}"
-                 aria-label="${isLocked ? "Unlock" : "Lock"} ${guest.name}"
-                 tabindex="0"
-                 title="${isLocked ? "Locked -- click to unlock" : "Click to lock -- locked guests won't be suggested for replacement"}">
-               ${isLocked ? LOCK_CLOSED_SVG : LOCK_OPEN_SVG}
-             </div>`
-          : "";
-
         // Conflict count badge
         const conflictBadge =
           isSelected && conflictsForGuest.length > 0
@@ -741,7 +747,6 @@ const App = (() => {
             <div class="guest-card ${isSelected ? "selected" : ""}"
                  data-slot="${slotIndex}" data-guest="${guestId}"
                  role="radio" aria-checked="${isSelected}" tabindex="0">
-              ${lockHtml}
               <div class="guest-check">\u2713</div>
               <div class="guest-portrait ${factionClass(guest.faction)}">${portraitImg}</div>
               <div class="guest-name">${guest.name}</div>
@@ -905,13 +910,18 @@ const App = (() => {
   function renderConflictBanner() {
     if (activeConflicts.length === 0) return "";
 
-    // Check if all conflicting guests are locked
+    // Check if all conflicting guests are in locked slots
     const conflictingGuestIds = new Set();
     activeConflicts.forEach((c) => {
       conflictingGuestIds.add(c.guestA);
       conflictingGuestIds.add(c.guestB);
     });
-    const allConflictingLocked = [...conflictingGuestIds].every((id) => lockedGuests.has(id));
+    const conflictingSlotIndices = new Set();
+    conflictingGuestIds.forEach((id) => {
+      const idx = selectedGuests.indexOf(id);
+      if (idx !== -1) conflictingSlotIndices.add(idx);
+    });
+    const allConflictingLocked = [...conflictingSlotIndices].every((idx) => lockedSlots.has(idx));
 
     const conflictWord = activeConflicts.length === 1 ? "Conflict" : "Conflicts";
 
@@ -938,7 +948,7 @@ const App = (() => {
     html += `
         </ul>
         <button class="btn-suggest" id="btn-suggest"
-                ${allConflictingLocked ? 'disabled title="All conflicting guests are locked."' : ""}>
+                ${allConflictingLocked ? 'disabled title="All conflicting slots are locked."' : ""}>
           Suggest Replacements
         </button>
       </div>`;
@@ -960,7 +970,7 @@ const App = (() => {
     if (replacementSuggestions.length === 0) {
       html += `
         <p style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; padding: var(--space-md);">
-          No single-swap replacements can reduce conflicts. Consider unlocking a guest or selecting different guests.
+          No single-swap replacements can reduce conflicts. Consider unlocking a slot or selecting different guests.
         </p>`;
     } else {
       replacementSuggestions.forEach((s, idx) => {
@@ -1296,15 +1306,15 @@ const App = (() => {
      ============================================================ */
 
   function bindEvents() {
-    // Lock toggles (must be bound BEFORE guest cards so stopPropagation works)
-    root.querySelectorAll(".guest-lock").forEach((lockEl) => {
+    // Slot lock toggles (must be bound BEFORE guest cards so stopPropagation works)
+    root.querySelectorAll(".slot-lock").forEach((lockEl) => {
       const handler = (e) => {
-        e.stopPropagation(); // Don't toggle guest selection
-        const guestId = lockEl.dataset.guest;
-        if (lockedGuests.has(guestId)) {
-          lockedGuests.delete(guestId);
+        e.stopPropagation();
+        const slotIndex = parseInt(lockEl.dataset.slot, 10);
+        if (lockedSlots.has(slotIndex)) {
+          lockedSlots.delete(slotIndex);
         } else {
-          lockedGuests.add(guestId);
+          lockedSlots.add(slotIndex);
         }
         // Dismiss suggestions on lock change
         showingSuggestions = false;
@@ -1446,11 +1456,6 @@ const App = (() => {
       btn.addEventListener("click", () => {
         const slotIndex = parseInt(btn.dataset.slot, 10);
         const newGuestId = btn.dataset.guestIn;
-        const oldGuestId = selectedGuests[slotIndex];
-        // Remove lock from swapped-out guest if any
-        if (oldGuestId) {
-          lockedGuests.delete(oldGuestId);
-        }
         selectedGuests[slotIndex] = newGuestId;
         showingSuggestions = false;
         replacementSuggestions = [];

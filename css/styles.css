@@ -374,40 +374,42 @@ body {
   transform: scale(1);
 }
 
-/* --- Guest Lock Toggle --- */
-.guest-lock {
-  position: absolute;
-  top: 6px;
-  left: 8px;
+/* --- Slot Lock Toggle (in slot header) --- */
+.slot-lock {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.65rem;
   cursor: pointer;
   transition: all 0.2s;
-  opacity: 0;
-  transform: scale(0.5);
-  z-index: 2;
   background: transparent;
   border: 1px solid var(--text-muted);
   color: var(--text-muted);
+  margin-left: var(--space-sm);
+  vertical-align: middle;
 }
-
-/* Only show on selected cards */
-.guest-card.selected .guest-lock {
-  opacity: 1;
-  transform: scale(1);
+.slot-lock:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+.slot-lock:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
 }
 
 /* Locked state */
-.guest-lock.locked {
+.slot-lock.locked {
   background: var(--accent-gold);
   border-color: var(--accent-gold);
   color: var(--bg-primary);
   box-shadow: 0 0 8px rgba(212, 168, 67, 0.3);
+}
+
+/* Visual feedback on locked slot's selected card */
+.slot-row.locked .guest-card.selected {
+  border-left: 3px solid var(--accent-gold);
 }
 
 /* --- Guest Conflict Count Badge --- */
@@ -1538,10 +1540,9 @@ body {
     padding: var(--space-md);
   }
 
-  .guest-lock {
-    width: 28px;
-    height: 28px;
-    font-size: 0.75rem;
+  .slot-lock {
+    width: 24px;
+    height: 24px;
   }
 
   .amenity-lock-toggle {
