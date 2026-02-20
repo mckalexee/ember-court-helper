@@ -281,6 +281,14 @@ body {
   font-size: 1.5rem;
   border: 2px solid var(--border-color);
   transition: border-color 0.2s;
+  overflow: hidden;
+}
+.guest-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
 }
 .guest-card.selected .guest-portrait {
   border-color: var(--accent-gold);
@@ -957,6 +965,14 @@ body {
   font-size: 1.1rem;
   flex-shrink: 0;
   border: 2px solid var(--border-color);
+  overflow: hidden;
+}
+.result-guest-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
 }
 
 .result-guest-info {

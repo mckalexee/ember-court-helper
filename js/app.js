@@ -77,14 +77,6 @@ const App = (() => {
     { key: "security", label: "Security", manager: "Watchmaster Boromod" },
   ];
 
-  /** Faction to icon emoji mapping */
-  const FACTION_ICONS = {
-    Venthyr: "\uD83E\uDDDB",   // vampire
-    Necrolord: "\uD83D\uDC80",  // skull
-    "Night Fae": "\uD83C\uDF3F", // herb
-    Kyrian: "\uD83D\uDD4A\uFE0F", // dove
-  };
-
   /** Faction CSS class */
   function factionClass(faction) {
     const map = {
@@ -633,7 +625,7 @@ const App = (() => {
 
         const isSelected = selectedGuests[slotIndex] === guestId;
         const isLocked = lockedGuests.has(guestId);
-        const icon = FACTION_ICONS[guest.faction] || "\u2726";
+        const portraitImg = `<img src="img/guests/${guestId}.png" alt="${guest.name}" width="128" height="128" loading="lazy">`;
 
         // Compute conflicts for this guest
         const conflictsForGuest = isSelected
@@ -676,7 +668,7 @@ const App = (() => {
                  role="radio" aria-checked="${isSelected}" tabindex="0">
               ${lockHtml}
               <div class="guest-check">\u2713</div>
-              <div class="guest-portrait ${factionClass(guest.faction)}">${icon}</div>
+              <div class="guest-portrait ${factionClass(guest.faction)}">${portraitImg}</div>
               <div class="guest-name">${guest.name}</div>
               <div class="guest-faction">${guest.faction}</div>
               <div class="guest-prefs">
@@ -1011,7 +1003,7 @@ const App = (() => {
     let html = `<div class="results-guests">`;
 
     guestScores.forEach(({ guest, total, details }) => {
-      const icon = FACTION_ICONS[guest.faction] || "\u2726";
+      const resultPortraitImg = `<img src="img/guests/${guest.id}.png" alt="${guest.name}" width="128" height="128" loading="lazy">`;
       const prefCount = details.filter((d) => d.prefValue !== 0).length;
 
       // Determine bar style
@@ -1029,7 +1021,7 @@ const App = (() => {
       html += `
         <div class="result-guest-card">
           <div class="result-guest-header">
-            <div class="result-guest-portrait ${factionClass(guest.faction)}">${icon}</div>
+            <div class="result-guest-portrait ${factionClass(guest.faction)}">${resultPortraitImg}</div>
             <div class="result-guest-info">
               <div class="result-guest-name">${guest.name}</div>
               <div class="result-guest-score">Score: ${total > 0 ? "+" : ""}${total} / ${prefCount}</div>
