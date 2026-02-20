@@ -24,43 +24,104 @@ const EmberCourtData = Object.freeze({
   guests: [
     // --- Slot 1 (Tier 1): 1 preference each ---
     { id: "kassir", name: "Cryptkeeper Kassir", faction: "Venthyr", slot: 1,
-      preferences: { cleanliness: 0, danger: 0, decadence: 0, excitement: 0, formality: 1 } },
+      preferences: { cleanliness: 0, danger: 0, decadence: 0, excitement: 0, formality: 1 },
+      rewards: [
+        { id: "kassir-tmog", type: "transmog", name: "Crypt Keeper's Mantle & Weapons" }
+      ] },
     { id: "marileth", name: "Plague Deviser Marileth", faction: "Necrolord", slot: 1,
-      preferences: { cleanliness: -1, danger: 0, decadence: 0, excitement: 0, formality: 0 } },
+      preferences: { cleanliness: -1, danger: 0, decadence: 0, excitement: 0, formality: 0 },
+      rewards: [
+        { id: "marileth-tmog", type: "transmog", name: "Plagueborne Weapons" }
+      ] },
     { id: "choofa", name: "Choofa", faction: "Night Fae", slot: 1,
-      preferences: { cleanliness: 0, danger: 0, decadence: 0, excitement: 1, formality: 0 } },
+      preferences: { cleanliness: 0, danger: 0, decadence: 0, excitement: 1, formality: 0 },
+      rewards: [
+        { id: "choofa-tmog", type: "transmog", name: "Ardenweald Weapons" }
+      ] },
     { id: "sika", name: "Sika", faction: "Kyrian", slot: 1,
-      preferences: { cleanliness: 1, danger: 0, decadence: 0, excitement: 0, formality: 0 } },
+      preferences: { cleanliness: 1, danger: 0, decadence: 0, excitement: 0, formality: 0 },
+      rewards: [
+        { id: "sika-pet", type: "pet", name: "Brightscale Hatchling" },
+        { id: "sika-tmog", type: "transmog", name: "Kyrian Weapons" }
+      ] },
 
     // --- Slot 2 (Tier 2): 1 preference each ---
     { id: "stonehead", name: "Stonehead", faction: "Venthyr", slot: 2,
-      preferences: { cleanliness: 0, danger: 0, decadence: 0, excitement: 0, formality: -1 } },
+      preferences: { cleanliness: 0, danger: 0, decadence: 0, excitement: 0, formality: -1 },
+      rewards: [
+        { id: "stonehead-pet", type: "pet", name: "Violet Dredwing Pup" },
+        { id: "stonehead-tmog", type: "transmog", name: "Bronze-Bound Sinstone & Weapons" }
+      ] },
     { id: "aliothe", name: "Droman Aliothe", faction: "Night Fae", slot: 2,
-      preferences: { cleanliness: 0, danger: 0, decadence: 0, excitement: -1, formality: 0 } },
+      preferences: { cleanliness: 0, danger: 0, decadence: 0, excitement: -1, formality: 0 },
+      rewards: [
+        { id: "aliothe-pet", type: "pet", name: "Pearlwing Heron" },
+        { id: "aliothe-tmog", type: "transmog", name: "Ardenweald Weapons" }
+      ] },
     { id: "vole", name: "Grandmaster Vole", faction: "Necrolord", slot: 2,
-      preferences: { cleanliness: 0, danger: 1, decadence: 0, excitement: 0, formality: 0 } },
+      preferences: { cleanliness: 0, danger: 1, decadence: 0, excitement: 0, formality: 0 },
+      rewards: [
+        { id: "vole-pet", type: "pet", name: "Corpulent Bonetusk" },
+        { id: "vole-tmog", type: "transmog", name: "Maldraxxian Weapons" }
+      ] },
     { id: "kleia", name: "Kleia & Pelagos", faction: "Kyrian", slot: 2,
-      preferences: { cleanliness: 0, danger: 0, decadence: -1, excitement: 0, formality: 0 } },
+      preferences: { cleanliness: 0, danger: 0, decadence: -1, excitement: 0, formality: 0 },
+      rewards: [
+        { id: "kleia-pet", type: "pet", name: "Sable" },
+        { id: "kleia-tmog", type: "transmog", name: "Kyrian Weapons" }
+      ] },
 
     // --- Slot 3 (Tier 3): 2 preferences each ---
     { id: "rendle", name: "Rendle & Cudgelface", faction: "Venthyr", slot: 3,
-      preferences: { cleanliness: -1, danger: 0, decadence: 0, excitement: -1, formality: 0 } },
+      preferences: { cleanliness: -1, danger: 0, decadence: 0, excitement: -1, formality: 0 },
+      rewards: [
+        { id: "rendle-pet", type: "pet", name: "Bloodfeaster Spiderling" },
+        { id: "rendle-tmog", type: "transmog", name: "Revendreth Weapons" }
+      ] },
     { id: "mograine", name: "Alexandros Mograine", faction: "Necrolord", slot: 3,
-      preferences: { cleanliness: 0, danger: -1, decadence: -1, excitement: 0, formality: 0 } },
+      preferences: { cleanliness: 0, danger: -1, decadence: -1, excitement: 0, formality: 0 },
+      rewards: [
+        { id: "mograine-mount", type: "mount", name: "Gruesome Flayedwing" },
+        { id: "mograine-tmog", type: "transmog", name: "Maldraxxian Weapons" }
+      ] },
     { id: "korayn", name: "Hunt-Captain Korayn", faction: "Night Fae", slot: 3,
-      preferences: { cleanliness: 0, danger: 1, decadence: 0, excitement: 0, formality: -1 } },
+      preferences: { cleanliness: 0, danger: 1, decadence: 0, excitement: 0, formality: -1 },
+      rewards: [
+        { id: "korayn-mount", type: "mount", name: "Pale Acidmaw" },
+        { id: "korayn-tmog", type: "transmog", name: "Night Fae Weapons" }
+      ] },
     { id: "adrestes", name: "Polemarch Adrestes", faction: "Kyrian", slot: 3,
-      preferences: { cleanliness: 1, danger: 0, decadence: 0, excitement: 0, formality: 1 } },
+      preferences: { cleanliness: 1, danger: 0, decadence: 0, excitement: 0, formality: 1 },
+      rewards: [
+        { id: "adrestes-tmog", type: "transmog", name: "Kyrian Weapons" }
+      ] },
 
     // --- Slot 4 (Tier 4): 3 preferences each ---
     { id: "countess", name: "The Countess", faction: "Venthyr", slot: 4,
-      preferences: { cleanliness: 0, danger: 0, decadence: 1, excitement: -1, formality: 1 } },
+      preferences: { cleanliness: 0, danger: 0, decadence: 1, excitement: -1, formality: 1 },
+      rewards: [
+        { id: "countess-mount", type: "mount", name: "Desire's Battle Gargon" },
+        { id: "countess-toy", type: "toy", name: "The Countess's Parasol" },
+        { id: "countess-tmog", type: "transmog", name: "Venthyr Weapons" }
+      ] },
     { id: "vashj", name: "Baroness Vashj", faction: "Necrolord", slot: 4,
-      preferences: { cleanliness: 0, danger: 1, decadence: 1, excitement: 1, formality: 0 } },
+      preferences: { cleanliness: 0, danger: 1, decadence: 1, excitement: 1, formality: 0 },
+      rewards: [
+        { id: "vashj-pet", type: "pet", name: "Plaguelouse Larva" },
+        { id: "vashj-tmog", type: "transmog", name: "Maldraxxian Weapons" }
+      ] },
     { id: "moonberry", name: "Lady Moonberry", faction: "Night Fae", slot: 4,
-      preferences: { cleanliness: -1, danger: 0, decadence: 0, excitement: 1, formality: -1 } },
+      preferences: { cleanliness: -1, danger: 0, decadence: 0, excitement: 1, formality: -1 },
+      rewards: [
+        { id: "moonberry-pet", type: "pet", name: "Dusty Sporeflutterer" },
+        { id: "moonberry-tmog", type: "transmog", name: "Ardenweald Weapons" }
+      ] },
     { id: "mikanikos", name: "Mikanikos", faction: "Kyrian", slot: 4,
-      preferences: { cleanliness: 1, danger: -1, decadence: -1, excitement: 0, formality: 0 } }
+      preferences: { cleanliness: 1, danger: -1, decadence: -1, excitement: 0, formality: 0 },
+      rewards: [
+        { id: "mikanikos-mount", type: "mount", name: "Dauntless Duskrunner" },
+        { id: "mikanikos-tmog", type: "transmog", name: "Kyrian Weapons" }
+      ] }
   ],
 
   amenities: [

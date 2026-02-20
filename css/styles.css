@@ -1105,6 +1105,321 @@ body {
 }
 
 /* ==========================================================
+   REWARD ICONS & PANEL
+   ========================================================== */
+
+/* Reward icon row on guest cards */
+.guest-reward-icons {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  margin-top: var(--space-sm);
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.guest-reward-icons:hover {
+  border-color: var(--accent-gold);
+  background: rgba(212, 168, 67, 0.08);
+}
+.guest-reward-icons:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 1px;
+}
+.guest-reward-icons.expanded {
+  border-color: var(--accent-gold);
+  background: rgba(212, 168, 67, 0.12);
+}
+.guest-reward-icons.all-collected {
+  opacity: 0.5;
+}
+.guest-reward-icons.all-collected:hover {
+  opacity: 0.8;
+}
+
+.reward-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+.reward-icon:hover {
+  border-color: var(--accent-gold);
+}
+.reward-icon.collected {
+  opacity: 0.35;
+  filter: grayscale(50%);
+}
+
+.reward-icons-check {
+  font-size: 0.7rem;
+  color: var(--positive);
+  margin-left: 2px;
+}
+
+/* Expandable reward detail panel */
+.reward-panel {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, #160e20 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  margin-top: var(--space-sm);
+}
+
+.reward-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.reward-panel-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  color: var(--text-heading);
+}
+
+.reward-panel-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+.reward-panel-close:hover {
+  color: var(--text-primary);
+}
+
+.reward-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.reward-row {
+  display: grid;
+  grid-template-columns: 28px 72px 1fr 28px;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  font-size: 0.85rem;
+}
+.reward-row:last-child {
+  border-bottom: none;
+}
+
+.reward-row-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  object-fit: cover;
+  display: block;
+}
+
+.reward-row-type {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.reward-row-name {
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Collected state on grid rows */
+.reward-row.collected .reward-row-name {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: rgba(154, 142, 176, 0.4);
+}
+
+.reward-row.collected .reward-row-icon {
+  opacity: 0.35;
+  filter: grayscale(50%);
+}
+
+/* ==========================================================
+   REWARD COLLECTION SECTION
+   ========================================================== */
+
+/* Overall progress bar */
+.reward-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  margin-bottom: var(--space-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.reward-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent-red-dark), var(--accent-gold));
+  transition: width 0.4s ease-out;
+}
+
+/* Category blocks */
+.reward-category {
+  margin-bottom: var(--space-lg);
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, #160e20 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-md) var(--space-lg);
+}
+
+.reward-category-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.reward-category-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  object-fit: cover;
+}
+
+.reward-category-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-gold);
+  letter-spacing: 0.04em;
+  flex: 1;
+}
+
+.reward-category-count {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  padding: 2px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* Reward rows in the collection section */
+.reward-category-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.reward-collection-row {
+  display: grid;
+  grid-template-columns: 32px 1fr auto 28px;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+.reward-collection-row:last-child {
+  border-bottom: none;
+}
+
+.reward-collection-row .reward-row-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  object-fit: cover;
+  display: block;
+}
+
+.reward-collection-name {
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reward-collection-guest {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+}
+
+/* Faction coloring on guest name badges */
+.reward-collection-guest.faction-venthyr  { color: var(--faction-venthyr); }
+.reward-collection-guest.faction-necrolord { color: var(--faction-necrolord); }
+.reward-collection-guest.faction-nightfae  { color: var(--faction-nightfae); }
+.reward-collection-guest.faction-kyrian    { color: var(--faction-kyrian); }
+
+/* Collected row state */
+.reward-collection-row.collected .reward-collection-name {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: rgba(154, 142, 176, 0.4);
+}
+
+.reward-collection-row.collected .reward-row-icon {
+  opacity: 0.35;
+  filter: grayscale(50%);
+}
+
+.reward-collection-row.collected .reward-collection-guest {
+  opacity: 0.5;
+}
+
+/* Checkbox button */
+.reward-collect-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.reward-collect-btn:hover {
+  border-color: var(--accent-gold);
+  background: rgba(212, 168, 67, 0.1);
+}
+
+.reward-collect-btn[aria-checked="true"] {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+
+.reward-collect-btn[aria-checked="true"] .reward-checkbox::after {
+  content: "\2713";
+  color: var(--bg-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* ==========================================================
    RESPONSIVE
    ========================================================== */
 
@@ -1206,6 +1521,30 @@ body {
   .amenity-chip.locked .amenity-lock-toggle {
     opacity: 1;
   }
+
+  .reward-row {
+    grid-template-columns: 24px 60px 1fr 24px;
+    font-size: 0.8rem;
+  }
+  .reward-row-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .reward-collection-row {
+    grid-template-columns: 28px 1fr 28px;
+    gap: var(--space-xs);
+  }
+  .reward-collection-row .reward-row-icon {
+    width: 28px;
+    height: 28px;
+  }
+  .reward-collection-guest {
+    display: none;
+  }
+  .reward-category {
+    padding: var(--space-sm) var(--space-md);
+  }
 }
 
 /* Very small screens */
@@ -1227,6 +1566,20 @@ body {
   }
   .guest-prefs {
     display: none;
+  }
+  .reward-icon {
+    width: 20px;
+    height: 20px;
+  }
+  .reward-collection-row {
+    grid-template-columns: 24px 1fr 24px;
+  }
+  .reward-collection-row .reward-row-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .reward-collection-name {
+    font-size: 0.78rem;
   }
 }
 

@@ -40,6 +40,12 @@ const App = (() => {
   let showingSuggestions = false;
   let replacementSuggestions = [];
 
+  // Set of reward IDs the user has collected (persisted to localStorage)
+  let collectedRewards = new Set();
+
+  // Which guest's reward panel is currently expanded (ephemeral, not persisted)
+  let expandedRewardGuest = null;
+
   /** Cached DOM root */
   let root;
 
@@ -67,6 +73,51 @@ const App = (() => {
 
   function getAmenitiesByCategory(cat) {
     return DATA.amenities.filter((a) => a.category === cat);
+  }
+
+  function getGuestRewards(guestId) {
+    const guest = getGuest(guestId);
+    return guest && guest.rewards ? guest.rewards : [];
+  }
+
+  function isRewardCollected(rewardId) {
+    return collectedRewards.has(rewardId);
+  }
+
+  function allRewardsCollected(guestId) {
+    const rewards = getGuestRewards(guestId);
+    return rewards.length > 0 && rewards.every((r) => collectedRewards.has(r.id));
+  }
+
+  const REWARD_CATEGORIES = [
+    { key: "mount",    label: "Mounts" },
+    { key: "pet",      label: "Pets" },
+    { key: "toy",      label: "Toys" },
+    { key: "transmog", label: "Transmog" },
+  ];
+
+  function getRewardIconPath(reward) {
+    if (reward.type === "transmog") {
+      return "img/rewards/transmog.jpg";
+    }
+    return "img/rewards/" + reward.id + ".jpg";
+  }
+
+  function getCategoryIconPath(type) {
+    return "img/rewards/" + type + "-category.jpg";
+  }
+
+  function getAllRewardsByType(type) {
+    var results = [];
+    DATA.guests.forEach(function (guest) {
+      if (!guest.rewards) return;
+      guest.rewards.forEach(function (reward) {
+        if (reward.type === type) {
+          results.push({ reward: reward, guest: guest });
+        }
+      });
+    });
+    return results;
   }
 
   /** Ordered list of amenity categories */
@@ -416,6 +467,7 @@ const App = (() => {
         selectedAmenities,
         lockedGuests: Array.from(lockedGuests),
         lockedAmenities: Array.from(lockedAmenities),
+        collectedRewards: Array.from(collectedRewards),
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (e) {
@@ -451,6 +503,9 @@ const App = (() => {
       if (Array.isArray(state.lockedAmenities)) {
         lockedAmenities = new Set(state.lockedAmenities);
       }
+      if (Array.isArray(state.collectedRewards)) {
+        collectedRewards = new Set(state.collectedRewards);
+      }
     } catch (e) {
       // ignore corrupt state
     }
@@ -468,6 +523,8 @@ const App = (() => {
     lockedAmenities = new Set();
     showingSuggestions = false;
     replacementSuggestions = [];
+    expandedRewardGuest = null;
+    // collectedRewards is NOT cleared -- collection progress is account-wide
     saveState();
     render();
   }
@@ -515,6 +572,25 @@ const App = (() => {
       }
     }
     saveState();
+    render();
+  }
+
+  function handleRewardToggle(rewardId) {
+    if (collectedRewards.has(rewardId)) {
+      collectedRewards.delete(rewardId);
+    } else {
+      collectedRewards.add(rewardId);
+    }
+    saveState();
+    render();
+  }
+
+  function handleRewardPanelToggle(guestId) {
+    if (expandedRewardGuest === guestId) {
+      expandedRewardGuest = null;
+    } else {
+      expandedRewardGuest = guestId;
+    }
     render();
   }
 
@@ -598,6 +674,8 @@ const App = (() => {
       renderOptimizeButton(),
       '<hr class="ec-divider">',
       renderResultsSection(),
+      '<hr class="ec-divider">',
+      renderRewardCollectionSection(),
     ].join("");
 
     bindEvents();
@@ -674,16 +752,144 @@ const App = (() => {
               <div class="guest-prefs">
                 ${prefTagsHtml}
               </div>
+              ${renderRewardIndicators(guest)}
               ${conflictBadge}
             </div>`;
       });
 
       html += `
-          </div>
+          </div>`;
+
+      // Conditionally render reward panel after the slot's guest grid
+      if (expandedRewardGuest && slot.guestIds.includes(expandedRewardGuest)) {
+        html += renderRewardPanel(expandedRewardGuest);
+      }
+
+      html += `
         </div>`;
     });
 
     html += `</section>`;
+    return html;
+  }
+
+  /* --- Reward Icon Row (on guest cards) --- */
+  function renderRewardIndicators(guest) {
+    var rewards = guest.rewards || [];
+    if (rewards.length === 0) return "";
+
+    var isExpanded = expandedRewardGuest === guest.id;
+    var allCollected = allRewardsCollected(guest.id);
+    var uncollected = rewards.filter(function (r) { return !collectedRewards.has(r.id); }).length;
+
+    var classes = "guest-reward-icons";
+    if (isExpanded) classes += " expanded";
+    if (allCollected) classes += " all-collected";
+
+    var ariaLabel = allCollected
+      ? "Rewards for " + guest.name + " - all collected"
+      : "Rewards for " + guest.name + ": " + uncollected + " uncollected";
+
+    var html = '<div class="' + classes + '" data-guest="' + guest.id + '" tabindex="0" role="button" aria-label="' + ariaLabel + '">';
+
+    rewards.forEach(function (r) {
+      var collected = collectedRewards.has(r.id);
+      var title = capitalize(r.type) + ": " + r.name + (collected ? " (Collected)" : "");
+      var alt = capitalize(r.type) + ": " + r.name + (collected ? " (Collected)" : "");
+      html += '<img class="reward-icon' + (collected ? " collected" : "") + '" src="' + getRewardIconPath(r) + '" alt="' + alt + '" title="' + title + '">';
+    });
+
+    if (allCollected) {
+      html += '<span class="reward-icons-check">&check;</span>';
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  /* --- Reward Panel (expandable detail) --- */
+  function renderRewardPanel(guestId) {
+    var guest = getGuest(guestId);
+    if (!guest) return "";
+    var rewards = guest.rewards || [];
+    if (rewards.length === 0) return "";
+
+    var html = '<div class="reward-panel" data-guest="' + guestId + '">';
+    html += '<div class="reward-panel-header">';
+    html += '<h3 class="reward-panel-title">Rewards for ' + guest.name + '</h3>';
+    html += '<button class="reward-panel-close" aria-label="Close reward panel">&times;</button>';
+    html += '</div>';
+    html += '<div class="reward-grid">';
+
+    rewards.forEach(function (r) {
+      var collected = collectedRewards.has(r.id);
+      html += '<div class="reward-row' + (collected ? " collected" : "") + '">';
+      html += '<img class="reward-row-icon" src="' + getRewardIconPath(r) + '" alt="' + r.name + '" width="28" height="28">';
+      html += '<span class="reward-row-type">' + capitalize(r.type) + '</span>';
+      html += '<span class="reward-row-name">' + r.name + '</span>';
+      html += '<button class="reward-collect-btn" data-reward="' + r.id + '" role="checkbox" aria-checked="' + collected + '" aria-label="' + (collected ? "Unmark " : "Mark ") + r.name + ' as collected" tabindex="0">';
+      html += '<span class="reward-checkbox"></span>';
+      html += '</button>';
+      html += '</div>';
+    });
+
+    html += '</div></div>';
+    return html;
+  }
+
+  /* --- Reward Collection Section --- */
+  function renderRewardCollectionSection() {
+    var totalRewards = DATA.guests.reduce(function (sum, g) {
+      return sum + (g.rewards ? g.rewards.length : 0);
+    }, 0);
+    var totalCollected = DATA.guests.reduce(function (sum, g) {
+      if (!g.rewards) return sum;
+      return sum + g.rewards.filter(function (r) { return collectedRewards.has(r.id); }).length;
+    }, 0);
+    var progressPct = totalRewards > 0 ? Math.round((totalCollected / totalRewards) * 100) : 0;
+
+    var html = '<section class="ec-section" id="reward-collection-section">';
+    html += '<div class="ec-section-header">';
+    html += '<h2 class="ec-section-title">Reward Collection</h2>';
+    html += '<span class="ec-section-badge">' + totalCollected + ' / ' + totalRewards + ' Collected</span>';
+    html += '</div>';
+
+    html += '<div class="reward-progress-bar">';
+    html += '<div class="reward-progress-fill" style="width: ' + progressPct + '%"></div>';
+    html += '</div>';
+
+    REWARD_CATEGORIES.forEach(function (category) {
+      var categoryRewards = getAllRewardsByType(category.key);
+      var categoryCollected = categoryRewards.filter(function (r) { return collectedRewards.has(r.reward.id); }).length;
+
+      html += '<div class="reward-category">';
+      html += '<div class="reward-category-header">';
+      html += '<img class="reward-category-icon" src="' + getCategoryIconPath(category.key) + '" alt="" width="28" height="28">';
+      html += '<h3 class="reward-category-title">' + category.label + '</h3>';
+      html += '<span class="reward-category-count">' + categoryCollected + ' / ' + categoryRewards.length + '</span>';
+      html += '</div>';
+      html += '<div class="reward-category-grid">';
+
+      categoryRewards.forEach(function (entry) {
+        var r = entry.reward;
+        var guest = entry.guest;
+        var collected = collectedRewards.has(r.id);
+        var fc = factionClass(guest.faction);
+
+        html += '<div class="reward-collection-row' + (collected ? " collected" : "") + '">';
+        html += '<img class="reward-row-icon" src="' + getRewardIconPath(r) + '" alt="' + r.name + '" width="32" height="32">';
+        html += '<span class="reward-collection-name">' + r.name + '</span>';
+        html += '<span class="reward-collection-guest ' + fc + '">' + guest.name + '</span>';
+        html += '<button class="reward-collect-btn" data-reward="' + r.id + '" role="checkbox" aria-checked="' + collected + '" aria-label="Mark ' + r.name + ' as collected" tabindex="0">';
+        html += '<span class="reward-checkbox"></span>';
+        html += '</button>';
+        html += '</div>';
+      });
+
+      html += '</div></div>';
+    });
+
+    html += '</section>';
     return html;
   }
 
@@ -1103,6 +1309,45 @@ const App = (() => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           handler(e);
+        }
+      });
+    });
+
+    // Reward icon row click (open/close panel) -- must bind before guest cards so stopPropagation works
+    root.querySelectorAll(".guest-reward-icons").forEach((btn) => {
+      const rewardHandler = (e) => {
+        e.stopPropagation();
+        const guestId = btn.dataset.guest;
+        if (guestId) handleRewardPanelToggle(guestId);
+      };
+      btn.addEventListener("click", rewardHandler);
+      btn.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          rewardHandler(e);
+        }
+      });
+    });
+
+    // Reward panel close button
+    root.querySelectorAll(".reward-panel-close").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        expandedRewardGuest = null;
+        render();
+      });
+    });
+
+    // Reward collection toggles
+    root.querySelectorAll(".reward-collect-btn").forEach((btn) => {
+      const collectHandler = (e) => {
+        e.stopPropagation();
+        handleRewardToggle(btn.dataset.reward);
+      };
+      btn.addEventListener("click", collectHandler);
+      btn.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          collectHandler(e);
         }
       });
     });

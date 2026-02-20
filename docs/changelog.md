@@ -4,6 +4,22 @@ A running log of features built for the Ember Court Calculator.
 
 ---
 
+## 004 -- Guest Reward Tracking (2026-02-20)
+
+Added reward data and collection tracking for all 16 guests (29 total rewards:
+4 mounts, 8 pets, 1 toy, 16 transmog). Each guest card displays actual item
+icon thumbnails (sourced from Wowhead, stored in img/rewards/) instead of
+abstract colored dots. Clicking the icons opens a grid-aligned detail panel with
+icon, type, name, and collection checkbox per row. A dedicated Reward Collection
+section at the bottom of the page shows all rewards organized by type (Mounts,
+Pets, Toys, Transmog) with per-category progress counters and an overall
+progress bar. Collection state persists to localStorage and is not cleared by
+Reset All. Fully responsive at 1023px, 640px, and 400px breakpoints.
+
+Docs: `features/004-guest-rewards/`
+
+---
+
 ## 003 -- Amenity Unlocks (2026-02-19)
 
 Added amenity lock/unlock functionality. Players can mark amenities as locked
