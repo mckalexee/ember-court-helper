@@ -823,13 +823,13 @@ const App = (() => {
       var nameHtml = r.wowheadUrl
         ? '<a href="' + r.wowheadUrl + '" target="_blank" rel="noopener noreferrer" class="reward-wowhead-link">' + r.name + ' &#x2197;</a>'
         : r.name;
-      var reqHtml = r.requirement && r.requirement !== "Any"
-        ? '<span class="reward-requirement">' + r.requirement + '</span>'
-        : '';
+      var typeLabel = '<span class="reward-row-type">' + capitalize(r.type) + '</span>';
       html += '<div class="reward-row' + (collected ? " collected" : "") + '">';
       html += '<img class="reward-row-icon" src="' + getRewardIconPath(r) + '" alt="' + r.name + '" width="28" height="28">';
-      html += '<span class="reward-row-type">' + capitalize(r.type) + reqHtml + '</span>';
-      html += '<span class="reward-row-name">' + nameHtml + '</span>';
+      html += '<span class="reward-row-name">' + typeLabel + ' ' + nameHtml + '</span>';
+      html += r.requirement && r.requirement !== "Any"
+        ? '<span class="reward-requirement">' + r.requirement + '</span>'
+        : '<span></span>';
       html += '<button class="reward-collect-btn" data-reward="' + r.id + '" role="checkbox" aria-checked="' + collected + '" aria-label="' + (collected ? "Unmark " : "Mark ") + r.name + ' as collected" tabindex="0">';
       html += '<span class="reward-checkbox"></span>';
       html += '</button>';
