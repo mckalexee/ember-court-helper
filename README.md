@@ -1,19 +1,22 @@
 # Ember Court Calculator
 
-A fan-made calculator and optimizer for the **Ember Court**, a Venthyr Covenant feature in *World of Warcraft: Shadowlands*. Select your invited guests, pick amenities, and let the tool find the combination that maximizes overall guest happiness.
-
-<!-- TODO: Add a screenshot of the application here -->
+A fan-made calculator and optimizer for the **Ember Court**, a Venthyr Covenant feature in *World of Warcraft: Shadowlands*. Select your invited guests, pick amenities, and let the tool find the combination that maximizes overall guest happiness. Track your reward collection progress across all 16 guests.
 
 ## Features
 
-- **Guest selection** -- Choose one guest per RSVP slot across 4 slots (16 total guests, one from each Covenant per slot).
+- **Guest selection** -- Choose one guest per RSVP slot across 4 slots (16 total guests, one from each Covenant per slot). Each guest displays their portrait, faction, and atmosphere preferences.
 - **Amenity selection** -- Pick one amenity in each of 4 categories: Entertainment, Refreshments, Decorations, and Security.
 - **Real-time impact indicators** -- Each amenity chip shows a numeric score reflecting how it would affect the currently selected guests.
 - **Brute-force optimizer** -- Click "Optimize Amenities" to evaluate all 81 possible amenity combinations and automatically apply the best one.
 - **Per-guest happiness breakdown** -- View each guest's score with a dimension-by-dimension detail list showing matches, conflicts, and neutral results.
+- **Conflict detection** -- Warns when selected guests have opposing preferences on the same dimension, with a detailed conflict list.
+- **Replacement suggestions** -- Recommends guest swaps to reduce conflicts, showing the happiness impact of each suggestion.
+- **Guest locking** -- Pin guests you want to keep so they won't be suggested for replacement.
+- **Amenity unlocks** -- Mark amenities as locked (not yet unlocked in-game) to exclude them from the optimizer and manual selection. Locked amenities show their unlock requirement and a Wowhead link.
+- **Reward tracking** -- Track collection progress for 44 rewards across all 16 guests (4 mounts, 8 pets, 1 toy, 31 transmog items). Each reward shows its actual Wowhead item icon, links to Wowhead, and displays the friendship level required to earn it. A dedicated Reward Collection section at the bottom organizes all rewards by type with per-category progress counters and an overall progress bar.
 - **Dark Venthyr-themed UI** -- Gothic aesthetic with deep purples, crimsons, and gold accents using the Cinzel serif font.
-- **Responsive design** -- Adapts to desktop, tablet, and mobile screen sizes, with reduced-motion support.
-- **State persistence** -- Selections are saved to `localStorage` and restored on reload.
+- **Responsive design** -- Adapts to desktop, tablet (1023px), mobile (640px), and small mobile (400px) screen sizes, with reduced-motion support.
+- **State persistence** -- Selections, locked guests/amenities, and collected rewards are saved to `localStorage` and restored on reload. Reward collection is preserved across resets.
 
 ## How to Run
 
@@ -67,14 +70,20 @@ ember-calculator/
   js/
     data.js           Guest, amenity, and dimension data (EmberCourtData)
     app.js            Application logic: rendering, scoring, optimizer, persistence
+  img/
+    guests/           Guest portrait images (128x128 PNG from warcraft.wiki.gg)
+    rewards/          Reward item icons (56x56 JPG from Wowhead CDN)
+  docs/
+    changelog.md      Feature history log
+    features/         Design and research docs per feature
 ```
 
 ## Data Sources
 
-Guest preferences, amenity effects, and RSVP slot assignments were compiled from:
+Guest preferences, amenity effects, RSVP slot assignments, reward data, and friendship requirements were compiled from:
 
-- [Wowhead](https://www.wowhead.com/) -- Ember Court guides and database
-- [Warcraft Wiki](https://warcraft.wiki.gg/) -- Ember Court article
+- [Wowhead](https://www.wowhead.com/) -- Ember Court guides, item database, and tribute loot tables
+- [Warcraft Wiki](https://warcraft.wiki.gg/) -- Ember Court article and guest portraits
 - Community guides and player-tested data
 
 ## Disclaimer
