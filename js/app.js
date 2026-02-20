@@ -3,6 +3,7 @@
  *
  * Full application logic: renders guest selection, amenity selection,
  * results panel, and handles the optimize algorithm.
+ * Includes conflict detection and replacement suggestion engine.
  * Depends on EmberCourtData from data.js.
  */
 
@@ -26,8 +27,26 @@ const App = (() => {
     security: null,
   };
 
+  // Set of guest IDs the user has locked (persisted to localStorage)
+  let lockedGuests = new Set();
+
+  // Computed on every render -- not persisted
+  let activeConflicts = [];
+
+  // Computed on demand when user clicks "Suggest Replacements"
+  let showingSuggestions = false;
+  let replacementSuggestions = [];
+
   /** Cached DOM root */
   let root;
+
+  /* ============================================================
+     SVG ICON CONSTANTS
+     ============================================================ */
+
+  const LOCK_OPEN_SVG = '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 2C9.24 2 7 4.24 7 7v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7c0-1.1-.36-2.12-.97-2.95M9 7a3 3 0 0 1 6 0v3h-2V7a1 1 0 1 0-2 0v1H9V7z"/></svg>';
+
+  const LOCK_CLOSED_SVG = '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M18 10h-1V7A5 5 0 0 0 7 7v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2zM9 7a3 3 0 0 1 6 0v3H9V7z"/></svg>';
 
   /* ============================================================
      DATA HELPERS
@@ -213,13 +232,185 @@ const App = (() => {
     }
   }
 
+  /**
+   * Run brute-force optimizer for an arbitrary guest lineup.
+   * Returns the best possible total happiness score.
+   */
+  function optimizeForLineup(guestIds) {
+    const cats = CATEGORIES.map((c) => c.key);
+    const optionsPerCat = cats.map((cat) => getAmenitiesByCategory(cat));
+
+    let bestScore = -Infinity;
+
+    function enumerate(catIdx, current) {
+      if (catIdx === cats.length) {
+        const score = totalHappiness(guestIds, current);
+        if (score > bestScore) {
+          bestScore = score;
+        }
+        return;
+      }
+
+      const cat = cats[catIdx];
+      const options = optionsPerCat[catIdx];
+
+      for (const option of options) {
+        current[cat] = option.id;
+        enumerate(catIdx + 1, current);
+      }
+    }
+
+    enumerate(0, {
+      entertainment: null,
+      refreshment: null,
+      decoration: null,
+      security: null,
+    });
+
+    return bestScore;
+  }
+
+  /* ============================================================
+     CONFLICT DETECTION
+     ============================================================ */
+
+  /**
+   * Detect conflicts between selected guests.
+   * A conflict exists when two selected guests have opposite non-zero
+   * preferences on the same dimension.
+   *
+   * Returns array of { dimension, guestA, guestB, labelA, labelB }
+   */
+  function detectConflicts(guestIds) {
+    const conflicts = [];
+    const activeIds = guestIds.filter((id) => id !== null);
+
+    for (let i = 0; i < activeIds.length; i++) {
+      for (let j = i + 1; j < activeIds.length; j++) {
+        const gA = getGuest(activeIds[i]);
+        const gB = getGuest(activeIds[j]);
+        if (!gA || !gB) continue;
+
+        DATA.dimensions.forEach((dim) => {
+          const prefA = gA.preferences[dim] || 0;
+          const prefB = gB.preferences[dim] || 0;
+
+          if (prefA !== 0 && prefB !== 0 && Math.sign(prefA) !== Math.sign(prefB)) {
+            conflicts.push({
+              dimension: dim,
+              guestA: activeIds[i],
+              guestB: activeIds[j],
+              labelA: prefLabel(dim, prefA),
+              labelB: prefLabel(dim, prefB),
+            });
+          }
+        });
+      }
+    }
+
+    return conflicts;
+  }
+
+  /* ============================================================
+     REPLACEMENT SUGGESTION ENGINE
+     ============================================================ */
+
+  /**
+   * Compute replacement suggestions for unlocked guests.
+   * For each unlocked selected guest, try each alternative in the same slot.
+   * Compare conflict count and optimal happiness for the candidate lineup.
+   * Return up to 3 best single-swap suggestions.
+   */
+  function computeSuggestions() {
+    const currentConflicts = detectConflicts(selectedGuests);
+    if (currentConflicts.length === 0) return [];
+
+    const currentBestHappiness = optimizeForLineup(selectedGuests);
+    const suggestions = [];
+
+    selectedGuests.forEach((guestId, slotIndex) => {
+      if (!guestId) return;
+      if (lockedGuests.has(guestId)) return;
+
+      const slot = DATA.slots[slotIndex];
+
+      slot.guestIds.forEach((altId) => {
+        if (altId === guestId) return;
+
+        // Build candidate lineup
+        const candidateLineup = [...selectedGuests];
+        candidateLineup[slotIndex] = altId;
+
+        // Compute conflicts for candidate
+        const candidateConflicts = detectConflicts(candidateLineup);
+        const conflictsResolved = currentConflicts.length - candidateConflicts.length;
+
+        if (conflictsResolved <= 0) return; // No improvement
+
+        // Determine which conflicts are resolved
+        const resolvedDetails = [];
+        currentConflicts.forEach((cc) => {
+          // Check if this conflict still exists in candidate
+          const stillExists = candidateConflicts.some(
+            (nc) =>
+              nc.dimension === cc.dimension &&
+              ((nc.guestA === cc.guestA && nc.guestB === cc.guestB) ||
+                (nc.guestA === cc.guestB && nc.guestB === cc.guestA))
+          );
+          if (!stillExists) {
+            resolvedDetails.push(cc);
+          }
+        });
+
+        // Compute optimal happiness for candidate lineup
+        const candidateBestHappiness = optimizeForLineup(candidateLineup);
+        const happinessDelta = candidateBestHappiness - currentBestHappiness;
+
+        suggestions.push({
+          guestOut: guestId,
+          guestIn: altId,
+          slotIndex,
+          conflictsResolved,
+          resolvedDetails,
+          happinessDelta,
+          candidateConflictCount: candidateConflicts.length,
+        });
+      });
+    });
+
+    // Sort by conflictsResolved DESC, then happinessDelta DESC
+    suggestions.sort((a, b) => {
+      if (b.conflictsResolved !== a.conflictsResolved) {
+        return b.conflictsResolved - a.conflictsResolved;
+      }
+      return b.happinessDelta - a.happinessDelta;
+    });
+
+    // Deduplicate: keep only the best suggestion per guest-out
+    const seen = new Set();
+    const deduped = [];
+    for (const s of suggestions) {
+      if (!seen.has(s.guestOut)) {
+        seen.add(s.guestOut);
+        deduped.push(s);
+      }
+    }
+
+    // Return top 3
+    return deduped.slice(0, 3);
+  }
+
   /* ============================================================
      PERSISTENCE
      ============================================================ */
 
   function saveState() {
     try {
-      const state = { selectedGuests, selectedAmenities };
+      const state = {
+        selectedGuests,
+        selectedAmenities,
+        lockedGuests: Array.from(lockedGuests),
+      };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (e) {
       // localStorage may be unavailable
@@ -242,6 +433,15 @@ const App = (() => {
           }
         }
       }
+      if (Array.isArray(state.lockedGuests)) {
+        lockedGuests = new Set(state.lockedGuests);
+        // Clean up: remove locks for guests that are no longer selected
+        lockedGuests.forEach((gId) => {
+          if (!selectedGuests.includes(gId)) {
+            lockedGuests.delete(gId);
+          }
+        });
+      }
     } catch (e) {
       // ignore corrupt state
     }
@@ -255,6 +455,9 @@ const App = (() => {
       decoration: null,
       security: null,
     };
+    lockedGuests = new Set();
+    showingSuggestions = false;
+    replacementSuggestions = [];
     saveState();
     render();
   }
@@ -265,11 +468,15 @@ const App = (() => {
 
   function handleGuestClick(slotIndex, guestId) {
     if (selectedGuests[slotIndex] === guestId) {
-      // Deselect
+      // Deselect -- also remove lock
       selectedGuests[slotIndex] = null;
+      lockedGuests.delete(guestId);
     } else {
       selectedGuests[slotIndex] = guestId;
     }
+    // Dismiss suggestions on any guest change
+    showingSuggestions = false;
+    replacementSuggestions = [];
     saveState();
     render();
   }
@@ -353,11 +560,13 @@ const App = (() => {
   function render() {
     if (!root || !DATA) return;
 
-    const hasGuests = selectedGuests.some((g) => g !== null);
-    const hasAmenities = Object.values(selectedAmenities).some((a) => a !== null);
+    // Compute conflicts for this render cycle
+    activeConflicts = detectConflicts(selectedGuests);
 
     root.innerHTML = [
       renderGuestSection(),
+      renderConflictBanner(),
+      renderSuggestionPanel(),
       '<hr class="ec-divider">',
       renderAmenitySection(),
       renderOptimizeButton(),
@@ -389,20 +598,57 @@ const App = (() => {
         if (!guest) return;
 
         const isSelected = selectedGuests[slotIndex] === guestId;
-        const prefs = guestPrefLabels(guest);
+        const isLocked = lockedGuests.has(guestId);
         const icon = FACTION_ICONS[guest.faction] || "\u2726";
+
+        // Compute conflicts for this guest
+        const conflictsForGuest = isSelected
+          ? activeConflicts.filter((c) => c.guestA === guestId || c.guestB === guestId)
+          : [];
+        const conflictingDims = new Set(conflictsForGuest.map((c) => c.dimension));
+
+        // Build preference tags with conflict awareness
+        const prefTagsHtml = DATA.dimensions
+          .map((dim) => {
+            const v = guest.preferences[dim];
+            if (v === 0) return "";
+            const label = prefLabel(dim, v);
+            const hasConflict = isSelected && conflictingDims.has(dim);
+            return `<span class="pref-tag ${hasConflict ? "conflict" : ""}">${label}</span>`;
+          })
+          .join("");
+
+        // Lock toggle (only on selected cards)
+        const lockHtml = isSelected
+          ? `<div class="guest-lock ${isLocked ? "locked" : ""}"
+                 data-slot="${slotIndex}" data-guest="${guestId}"
+                 role="checkbox" aria-checked="${isLocked}"
+                 aria-label="${isLocked ? "Unlock" : "Lock"} ${guest.name}"
+                 tabindex="0"
+                 title="${isLocked ? "Locked -- click to unlock" : "Click to lock -- locked guests won't be suggested for replacement"}">
+               ${isLocked ? LOCK_CLOSED_SVG : LOCK_OPEN_SVG}
+             </div>`
+          : "";
+
+        // Conflict count badge
+        const conflictBadge =
+          isSelected && conflictsForGuest.length > 0
+            ? `<div class="guest-conflict-badge" aria-label="${conflictsForGuest.length} conflict${conflictsForGuest.length !== 1 ? "s" : ""}">${conflictsForGuest.length}</div>`
+            : "";
 
         html += `
             <div class="guest-card ${isSelected ? "selected" : ""}"
                  data-slot="${slotIndex}" data-guest="${guestId}"
                  role="radio" aria-checked="${isSelected}" tabindex="0">
+              ${lockHtml}
               <div class="guest-check">\u2713</div>
               <div class="guest-portrait ${factionClass(guest.faction)}">${icon}</div>
               <div class="guest-name">${guest.name}</div>
               <div class="guest-faction">${guest.faction}</div>
               <div class="guest-prefs">
-                ${prefs.map((p) => `<span class="pref-tag">${p}</span>`).join("")}
+                ${prefTagsHtml}
               </div>
+              ${conflictBadge}
             </div>`;
       });
 
@@ -412,6 +658,123 @@ const App = (() => {
     });
 
     html += `</section>`;
+    return html;
+  }
+
+  /* --- Conflict Banner --- */
+  function renderConflictBanner() {
+    if (activeConflicts.length === 0) return "";
+
+    // Check if all conflicting guests are locked
+    const conflictingGuestIds = new Set();
+    activeConflicts.forEach((c) => {
+      conflictingGuestIds.add(c.guestA);
+      conflictingGuestIds.add(c.guestB);
+    });
+    const allConflictingLocked = [...conflictingGuestIds].every((id) => lockedGuests.has(id));
+
+    const conflictWord = activeConflicts.length === 1 ? "Conflict" : "Conflicts";
+
+    let html = `
+      <div class="conflict-banner">
+        <div class="conflict-banner-title">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="var(--negative)">
+            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+          </svg>
+          ${activeConflicts.length} ${conflictWord} Detected
+        </div>
+        <ul class="conflict-banner-list">`;
+
+    activeConflicts.forEach((c) => {
+      const gA = getGuest(c.guestA);
+      const gB = getGuest(c.guestB);
+      html += `
+          <li class="conflict-banner-item">
+            <span class="conflict-dim-name">${capitalize(c.dimension)}:</span>
+            ${gA ? gA.name : c.guestA} (${c.labelA}) vs ${gB ? gB.name : c.guestB} (${c.labelB})
+          </li>`;
+    });
+
+    html += `
+        </ul>
+        <button class="btn-suggest" id="btn-suggest"
+                ${allConflictingLocked ? 'disabled title="All conflicting guests are locked."' : ""}>
+          Suggest Replacements
+        </button>
+      </div>`;
+
+    return html;
+  }
+
+  /* --- Suggestion Panel --- */
+  function renderSuggestionPanel() {
+    if (!showingSuggestions) return "";
+
+    let html = `
+      <div class="suggestion-panel">
+        <div class="suggestion-panel-header">
+          <h3 class="suggestion-panel-title">Replacement Suggestions</h3>
+          <button class="suggestion-dismiss" id="suggestion-dismiss" aria-label="Dismiss suggestions">&times;</button>
+        </div>`;
+
+    if (replacementSuggestions.length === 0) {
+      html += `
+        <p style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; padding: var(--space-md);">
+          No single-swap replacements can reduce conflicts. Consider unlocking a guest or selecting different guests.
+        </p>`;
+    } else {
+      replacementSuggestions.forEach((s, idx) => {
+        const guestOut = getGuest(s.guestOut);
+        const guestIn = getGuest(s.guestIn);
+        const slotName = DATA.slots[s.slotIndex].name;
+
+        // Build "Resolves" text
+        const resolvesText = s.resolvedDetails
+          .map((rd) => {
+            const otherGuestId = rd.guestA === s.guestOut ? rd.guestB : rd.guestA;
+            const otherGuest = getGuest(otherGuestId);
+            return `${capitalize(rd.dimension)} conflict with ${otherGuest ? otherGuest.name : otherGuestId}`;
+          })
+          .join("; ");
+
+        // Happiness delta display
+        let deltaClass = "delta-neutral";
+        let deltaText = "0";
+        if (s.happinessDelta > 0) {
+          deltaClass = "delta-positive";
+          deltaText = "+" + s.happinessDelta;
+        } else if (s.happinessDelta < 0) {
+          deltaClass = "delta-negative";
+          deltaText = "" + s.happinessDelta;
+        }
+
+        const conflictWord2 = s.conflictsResolved === 1 ? "conflict" : "conflicts";
+
+        html += `
+          <div class="suggestion-item">
+            <div class="suggestion-swap">
+              ${idx + 1}. Swap
+              <span class="guest-out">${guestOut ? guestOut.name : s.guestOut}</span>
+              <span class="arrow">\u2192</span>
+              <span class="guest-in">${guestIn ? guestIn.name : s.guestIn}</span>
+              (${slotName})
+            </div>
+            <div class="suggestion-resolves">Resolves: ${resolvesText}</div>
+            <div class="suggestion-effect">
+              Net effect: -${s.conflictsResolved} ${conflictWord2}, happiness delta:
+              <span class="${deltaClass}">${deltaText}</span>
+            </div>
+            <button class="btn-apply-swap"
+                    data-slot="${s.slotIndex}"
+                    data-guest-in="${s.guestIn}"
+                    aria-label="Apply swap: replace ${guestOut ? guestOut.name : s.guestOut} with ${guestIn ? guestIn.name : s.guestIn}">
+              Apply Swap
+            </button>
+          </div>`;
+      });
+    }
+
+    html += `</div>`;
     return html;
   }
 
@@ -665,6 +1028,31 @@ const App = (() => {
      ============================================================ */
 
   function bindEvents() {
+    // Lock toggles (must be bound BEFORE guest cards so stopPropagation works)
+    root.querySelectorAll(".guest-lock").forEach((lockEl) => {
+      const handler = (e) => {
+        e.stopPropagation(); // Don't toggle guest selection
+        const guestId = lockEl.dataset.guest;
+        if (lockedGuests.has(guestId)) {
+          lockedGuests.delete(guestId);
+        } else {
+          lockedGuests.add(guestId);
+        }
+        // Dismiss suggestions on lock change
+        showingSuggestions = false;
+        replacementSuggestions = [];
+        saveState();
+        render();
+      };
+      lockEl.addEventListener("click", handler);
+      lockEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handler(e);
+        }
+      });
+    });
+
     // Guest cards
     root.querySelectorAll(".guest-card").forEach((card) => {
       const handler = () => {
@@ -709,6 +1097,44 @@ const App = (() => {
         }
       });
     }
+
+    // Suggest Replacements button
+    const suggestBtn = document.getElementById("btn-suggest");
+    if (suggestBtn) {
+      suggestBtn.addEventListener("click", () => {
+        replacementSuggestions = computeSuggestions();
+        showingSuggestions = true;
+        render();
+      });
+    }
+
+    // Dismiss suggestions
+    const dismissBtn = document.getElementById("suggestion-dismiss");
+    if (dismissBtn) {
+      dismissBtn.addEventListener("click", () => {
+        showingSuggestions = false;
+        replacementSuggestions = [];
+        render();
+      });
+    }
+
+    // Apply swap buttons
+    root.querySelectorAll(".btn-apply-swap").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const slotIndex = parseInt(btn.dataset.slot, 10);
+        const newGuestId = btn.dataset.guestIn;
+        const oldGuestId = selectedGuests[slotIndex];
+        // Remove lock from swapped-out guest if any
+        if (oldGuestId) {
+          lockedGuests.delete(oldGuestId);
+        }
+        selectedGuests[slotIndex] = newGuestId;
+        showingSuggestions = false;
+        replacementSuggestions = [];
+        saveState();
+        render();
+      });
+    });
 
     // Reset button (in header, outside #app-root)
     const resetBtn = document.getElementById("reset-all");

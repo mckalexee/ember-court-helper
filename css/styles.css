@@ -329,6 +329,19 @@ body {
   color: var(--accent-gold-light);
 }
 
+/* Conflicting preference tag */
+.pref-tag.conflict {
+  background: rgba(229, 57, 53, 0.2);
+  color: var(--negative);
+  border: 1px solid rgba(229, 57, 53, 0.4);
+}
+
+/* On selected cards, override the gold styling for conflict tags */
+.guest-card.selected .pref-tag.conflict {
+  background: rgba(229, 57, 53, 0.2);
+  color: var(--negative);
+}
+
 /* Selected check badge */
 .guest-check {
   position: absolute;
@@ -351,6 +364,237 @@ body {
 .guest-card.selected .guest-check {
   opacity: 1;
   transform: scale(1);
+}
+
+/* --- Guest Lock Toggle --- */
+.guest-lock {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0;
+  transform: scale(0.5);
+  z-index: 2;
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  color: var(--text-muted);
+}
+
+/* Only show on selected cards */
+.guest-card.selected .guest-lock {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Locked state */
+.guest-lock.locked {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  color: var(--bg-primary);
+  box-shadow: 0 0 8px rgba(212, 168, 67, 0.3);
+}
+
+/* --- Guest Conflict Count Badge --- */
+.guest-conflict-badge {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--negative);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 0 6px rgba(229, 57, 53, 0.4);
+}
+
+/* ==========================================================
+   CONFLICT BANNER
+   ========================================================== */
+
+.conflict-banner {
+  background: linear-gradient(135deg, rgba(229, 57, 53, 0.08) 0%, rgba(139, 26, 58, 0.08) 100%);
+  border: 1px solid rgba(229, 57, 53, 0.3);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  margin: var(--space-md) 0;
+}
+
+.conflict-banner-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  color: var(--negative);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.conflict-banner-list {
+  list-style: none;
+  margin-bottom: var(--space-md);
+}
+
+.conflict-banner-item {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  padding: 3px 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.conflict-banner-item::before {
+  content: "\2717";
+  color: var(--negative);
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.conflict-dim-name {
+  color: var(--text-primary);
+  font-weight: 600;
+  min-width: 80px;
+}
+
+/* --- Suggest Replacements Button --- */
+.btn-suggest {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, var(--accent-red-dark) 0%, var(--accent-red) 100%);
+  color: var(--text-heading);
+  border: 1px solid var(--accent-red-light);
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-suggest:hover {
+  background: linear-gradient(135deg, var(--accent-red) 0%, var(--accent-red-light) 100%);
+  box-shadow: 0 0 12px rgba(198, 45, 91, 0.3);
+}
+
+.btn-suggest:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ==========================================================
+   SUGGESTION PANEL
+   ========================================================== */
+
+.suggestion-panel {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, #160e20 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-lg);
+  margin: var(--space-md) 0;
+}
+
+.suggestion-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.suggestion-panel-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  color: var(--text-heading);
+}
+
+.suggestion-dismiss {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+.suggestion-dismiss:hover {
+  color: var(--text-primary);
+}
+
+.suggestion-item {
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.suggestion-swap {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.suggestion-swap .guest-out {
+  color: var(--negative);
+  text-decoration: line-through;
+  text-decoration-color: rgba(229, 57, 53, 0.5);
+}
+
+.suggestion-swap .guest-in {
+  color: var(--positive);
+  font-weight: 600;
+}
+
+.suggestion-swap .arrow {
+  color: var(--text-muted);
+  margin: 0 var(--space-xs);
+}
+
+.suggestion-resolves {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.suggestion-effect {
+  font-size: 0.78rem;
+  margin-bottom: var(--space-sm);
+}
+
+.suggestion-effect .delta-positive { color: var(--positive); }
+.suggestion-effect .delta-negative { color: var(--negative); }
+.suggestion-effect .delta-neutral  { color: var(--neutral); }
+
+.btn-apply-swap {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 16px;
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  border-radius: var(--border-radius);
+  color: var(--positive);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-apply-swap:hover {
+  background: rgba(76, 175, 80, 0.25);
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.2);
 }
 
 /* ==========================================================
@@ -844,6 +1088,21 @@ body {
   .atmosphere-dims {
     flex-direction: column;
     align-items: center;
+  }
+
+  /* Conflict & suggestion responsive adjustments */
+  .conflict-banner {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .suggestion-panel {
+    padding: var(--space-md);
+  }
+
+  .guest-lock {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
   }
 }
 
