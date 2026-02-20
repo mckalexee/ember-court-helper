@@ -4,6 +4,27 @@ A running log of features built for the Ember Court Calculator.
 
 ---
 
+## 007 -- Event Mechanics (2026-02-20)
+
+Added an "During the Court" event playbook section that shows players exactly what
+to do during the Ember Court event. For each selected Entertainment, Refreshment,
+and Decoration amenity, the playbook shows the 2 in-event activities with DO/SKIP/
+CAUTION verdicts based on guest preferences, gameplay tips, dual-nature options,
+and Preparation Phase badges. Also shows relevant random dual-choice events with
+recommended choices, and party crasher bosses that may appear.
+
+Updated the optimizer to use event-aware scoring: amenity activities that align
+with guest preferences add a small weighted bonus (0.1 per alignment), acting as
+a tiebreaker when base scores are equal. This ensures the optimizer prefers
+amenities whose in-event activities further benefit the guest lineup.
+
+Data model expanded with activity data for all 12 amenities (18 activities total),
+11 random dual-choice events, and 5 party crasher boss entries.
+
+Docs: `features/007-event-mechanics/`
+
+---
+
 ## 006 -- Dimension Colors (2026-02-20)
 
 Added per-dimension colors to all atmosphere dimension labels throughout the UI.

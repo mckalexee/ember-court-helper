@@ -187,58 +187,195 @@ const EmberCourtData = Object.freeze({
     // --- Entertainment (managed by Hips) ---
     { id: "atoning", name: "Atoning Rituals", category: "entertainment",
       effects: { cleanliness: 0, danger: 0, decadence: -1, excitement: 0, formality: 1 },
+      activities: [
+        { name: "Ritual of Accusation", dim: "formality", direction: 1,
+          tip: "Judge 8 souls at the Main Stage \u2014 match confessions to faults",
+          dualNature: "Misjudge intentionally for +Casual instead",
+          prepPhase: false },
+        { name: "Ritual of Absolution", dim: "decadence", direction: -1,
+          tip: "Kill 20 Manifestations near the altar",
+          dualNature: null,
+          prepPhase: false }
+      ],
       unlock: { requirement: "Available from start", questId: 61407,
         wowheadUrl: "https://www.wowhead.com/quest=61407/ember-court-atoning-rituals" } },
     { id: "wilds", name: "Glimpse of the Wilds", category: "entertainment",
       effects: { cleanliness: 1, danger: -1, decadence: 0, excitement: 0, formality: 0 },
+      activities: [
+        { name: "Animal Rescue", dim: "cleanliness", direction: 1,
+          tip: "Control Niya to collect 10 escaped animals \u2014 Groupers to water bubble, Gormlings to crates",
+          dualNature: null,
+          prepPhase: false },
+        { name: "Ride on the Wild Side", dim: "danger", direction: -1,
+          tip: "Control a Hungry Gorm vehicle \u2014 consume objects, avoid hazards, break nets",
+          dualNature: null,
+          prepPhase: false }
+      ],
       unlock: { requirement: "Available from start", questId: 61408,
         wowheadUrl: "https://www.wowhead.com/quest=61408/ember-court-glimpse-of-the-wilds" } },
     { id: "band", name: "Lost Chalice Band", category: "entertainment",
       effects: { cleanliness: 0, danger: 0, decadence: 1, excitement: 1, formality: 0 },
+      activities: [
+        { name: "Concert Kick-Off", dim: "excitement", direction: 1,
+          tip: "Light 4 stage lights and retrieve 3 instruments from around the court",
+          dualNature: null,
+          prepPhase: true },
+        { name: "Dance for Love", dim: "decadence", direction: 1,
+          tip: "Guide Iven through a dance \u2014 respond to his statements within a few seconds",
+          dualNature: null,
+          prepPhase: false }
+      ],
       unlock: { requirement: "Staff: Stage Crew (Honored)", questId: 61738,
         wowheadUrl: "https://www.wowhead.com/quest=61738/ember-court-lost-chalice-band" } },
 
     // --- Refreshments (managed by Picky Stefan) ---
     { id: "tea", name: "Tubbin's Tea Party", category: "refreshment",
       effects: { cleanliness: 0, danger: 0, decadence: 0, excitement: -1, formality: 1 },
+      activities: [
+        { name: "Tea Time", dim: "formality", direction: 1,
+          tip: "Grab teapots from the Food Stall and serve tea to NPCs before it grows cold",
+          dualNature: null,
+          prepPhase: false },
+        { name: "A Quiet Moment", dim: "excitement", direction: -1,
+          tip: "Sit in a glowing chair near the Food Stall and channel 3 abilities (8s each)",
+          dualNature: null,
+          prepPhase: true }
+      ],
       unlock: { requirement: "Available from start", questId: 61404,
         wowheadUrl: "https://www.wowhead.com/quest=61404/ember-court-tubbinss-tea-party" } },
     { id: "desserts", name: "Divine Desserts", category: "refreshment",
       effects: { cleanliness: -1, danger: 0, decadence: 1, excitement: 0, formality: 0 },
+      activities: [
+        { name: "Food Fight", dim: "cleanliness", direction: -1,
+          tip: "Flip 3 tables near the Food Stall, then throw food at 15 guests",
+          dualNature: null,
+          prepPhase: false },
+        { name: "Made to Order", dim: "decadence", direction: 1,
+          tip: "Control Wicklick \u2014 Serve Cake to hungry guests, Drinks to thirsty ones",
+          dualNature: null,
+          prepPhase: false }
+      ],
       unlock: { requirement: "Available from start", questId: 61405,
         wowheadUrl: "https://www.wowhead.com/quest=61405/ember-court-divine-desserts" } },
     { id: "mushroom", name: "Mushroom Surprise", category: "refreshment",
       effects: { cleanliness: 0, danger: 1, decadence: -1, excitement: 0, formality: 0 },
+      activities: [
+        { name: "Fungi Experiments", dim: "danger", direction: 1,
+          tip: "Sample 10 flat mushrooms near the Muck Pool \u2014 they may explode or spawn enemies",
+          dualNature: null,
+          prepPhase: true },
+        { name: "Lower Your Standards", dim: "decadence", direction: -1,
+          tip: "Collect 10 Wild Fungus from ground clusters, turn in 5 at a time to Picky Stefan",
+          dualNature: null,
+          prepPhase: true }
+      ],
       unlock: { requirement: "Staff: Waiters (Honored)", questId: 61406,
         wowheadUrl: "https://www.wowhead.com/quest=61406/ember-court-mushroom-surprise" } },
 
     // --- Decorations (managed by Boot the Beaut) ---
     { id: "traditional", name: "Traditional", category: "decoration",
       effects: { cleanliness: 1, danger: 1, decadence: 0, excitement: 0, formality: 0 },
+      activities: [
+        { name: "Traditional Candles", dim: "cleanliness", direction: 1,
+          tip: "Click 10 glowing dripping candles around the court to clean wax",
+          dualNature: null,
+          prepPhase: false },
+        { name: "Roaring Fires", dim: "danger", direction: 1,
+          tip: "Leave 10 fires burning for +Dangerous (auto-completes at party end)",
+          dualNature: "Use Anima-Infused Water buckets to extinguish fires for +Safe instead",
+          prepPhase: false }
+      ],
       unlock: { requirement: "Building: Dredger Pool (Friendly)", questId: 61398,
         wowheadUrl: "https://www.wowhead.com/quest=61398/ember-court-traditional" } },
     { id: "mortal", name: "Mortal Reminders", category: "decoration",
       effects: { cleanliness: 0, danger: 0, decadence: 0, excitement: -1, formality: -1 },
+      activities: [
+        { name: "Cartel Ta Justice", dim: "formality", direction: -1,
+          tip: "Trap Suspicious Waiters and throw 10 of them off cliff edges",
+          dualNature: null,
+          prepPhase: false },
+        { name: "Stolen Mementos", dim: "excitement", direction: -1,
+          tip: "Collect 10 Stolen Mementos from trapped waiters, return to Keeper Ta\u2019saran",
+          dualNature: null,
+          prepPhase: false }
+      ],
       unlock: { requirement: "Building: Dredger Pool (Friendly)", questId: 61399,
         wowheadUrl: "https://www.wowhead.com/quest=61399/ember-court-mortal-reminders" } },
     { id: "mirrors", name: "Mystery Mirrors", category: "decoration",
       effects: { cleanliness: 0, danger: -1, decadence: 0, excitement: 1, formality: 0 },
+      activities: [
+        { name: "Mystery Mirrors", dim: "excitement", direction: 1,
+          tip: "Find 10 chained mirrors, click each to spawn and defeat an enemy",
+          dualNature: null,
+          prepPhase: true },
+        { name: "Prison Break", dim: "danger", direction: -1,
+          tip: "Kill 10 Escaped Prisoners that spawn during the party",
+          dualNature: "Ignore prisoners to allow passive +Dangerous buildup instead",
+          prepPhase: false }
+      ],
       unlock: { requirement: "Staff: Dredger Decorators (Revered)", questId: 61400,
         wowheadUrl: "https://www.wowhead.com/quest=61400/ember-court-mystery-mirrors" } },
 
     // --- Security (managed by Watchmaster Boromod) ---
+    // Security amenities provide base effects only -- no in-event activities
     { id: "venthyr", name: "Venthyr Volunteers", category: "security",
       effects: { cleanliness: 0, danger: 1, decadence: 0, excitement: 1, formality: 0 },
+      activities: [],
       unlock: { requirement: "Building: Guardhouse (Honored)", questId: 61401,
         wowheadUrl: "https://www.wowhead.com/quest=61401/ember-court-venthyr-volunteers" } },
     { id: "stoneborn", name: "Stoneborn Reserves", category: "security",
       effects: { cleanliness: 0, danger: -1, decadence: 1, excitement: 0, formality: 0 },
+      activities: [],
       unlock: { requirement: "Building: Guardhouse (Honored)", questId: 61402,
         wowheadUrl: "https://www.wowhead.com/quest=61402/ember-court-stoneborn-reserves" } },
     { id: "maldraxxian", name: "Maldraxxian Army", category: "security",
       effects: { cleanliness: -1, danger: 0, decadence: 0, excitement: 0, formality: -1 },
+      activities: [],
       unlock: { requirement: "Staff: Bouncers (Revered)", questId: 61403,
         wowheadUrl: "https://www.wowhead.com/quest=61403/ember-court-maldraxxus-army" } }
+  ],
+
+  // Random dual-choice events that may spawn during the party.
+  // Each event only appears if at least one invited guest has a preference on its dimension.
+  randomEvents: [
+    // Formality
+    { name: "A Little More Comfortable", dim: "formality",
+      positive: "Choose Fancy Outfit", negative: "Choose Unassuming Outfit" },
+    { name: "Court Crusher", dim: "formality",
+      positive: "Present Sinstones to Prince Renathal", negative: "Crush Sinstones" },
+    // Cleanliness
+    { name: "Clumpdump", dim: "cleanliness",
+      positive: "Pick up trash following Clumpdump", negative: "Ignore the mess" },
+    { name: "Blustery Boil", dim: "cleanliness",
+      positive: "Turn slime blob in to Prince Renathal", negative: "Release the slime blob" },
+    { name: "Party Pests", dim: "cleanliness",
+      positive: "Catch bugs with net", negative: "Detonate bugs with wand" },
+    // Danger
+    { name: "Knockerbock", dim: "danger",
+      positive: "Detonate Faulty Fireworks", negative: "Turn in Faulty Fireworks" },
+    { name: "Colonel Mort Murder", dim: "danger",
+      positive: "Close investigation, let killer go free", negative: "Hunt down Furtive Assassin" },
+    // Decadence
+    { name: "Ember Skyterror", dim: "decadence",
+      positive: "Plant Cluster of Seeds in soil", negative: "Deliver Cluster of Seeds to Prince Renathal" },
+    { name: "Legacy of Stone", dim: "decadence",
+      positive: "Sculpture honors self", negative: "Sculpture honors others" },
+    // Excitement
+    { name: "Crime of Fashion", dim: "excitement",
+      positive: "Let Fredrik and Harlowe fight", negative: "Reconcile Fredrik and Harlowe" },
+    { name: "Venthyr Provocateur", dim: "excitement",
+      positive: "Spread Court Gossip around the party", negative: "Deliver Court Gossip to Prince Renathal" }
+  ],
+
+  // Party crasher boss encounters. Each only spawns if its atmosphere bonus
+  // would benefit at least one invited guest. Defeating the boss gives a large
+  // single-dimension atmosphere boost.
+  partyCrashers: [
+    { name: "Master's Forces", boss: "High Inquisitor Vetar", dim: "excitement", direction: -1 },
+    { name: "Stone Legion", boss: "Drezgruda", dim: "decadence", direction: 1 },
+    { name: "Rampaging Dredgers", boss: "Sloppy", dim: "cleanliness", direction: 1 },
+    { name: "Lost Souls", boss: "Sineater", dim: "formality", direction: 1 },
+    { name: "Devourers", boss: "Kedu", dim: "danger", direction: -1 }
   ],
 
   happinessLevels: ["Miserable", "Unhappy", "Uncomfortable", "Comfortable", "Happy", "Elated"],

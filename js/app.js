@@ -232,6 +232,66 @@ const App = (() => {
   }
 
   /* ============================================================
+     EVENT-AWARE SCORING
+     ============================================================ */
+
+  /**
+   * Weight for event bonus in optimizer scoring.
+   * Kept small so events act as tiebreakers, never overriding base scores.
+   * Max raw activity benefit: 4 guests x 6 activities = 24 alignment points.
+   * At 0.1 weight, max event bonus = 2.4 (less than 3 base score points).
+   */
+  const EVENT_WEIGHT = 0.1;
+
+  /**
+   * Compute an event bonus for amenity selections against a set of guests.
+   * For each amenity's activities, +1 per guest whose preference aligns
+   * with the activity's direction. Conflicting activities score 0 (skippable).
+   */
+  function eventBonus(amenitySelections, guestIds) {
+    let bonus = 0;
+    Object.values(amenitySelections).forEach(function (amenityId) {
+      if (!amenityId) return;
+      var amenity = getAmenity(amenityId);
+      if (!amenity || !amenity.activities) return;
+      amenity.activities.forEach(function (activity) {
+        guestIds.forEach(function (gId) {
+          if (!gId) return;
+          var guest = getGuest(gId);
+          if (!guest) return;
+          var pref = guest.preferences[activity.dim] || 0;
+          if (pref !== 0 && Math.sign(pref) === Math.sign(activity.direction)) {
+            bonus += 1;
+          }
+        });
+      });
+    });
+    return bonus * EVENT_WEIGHT;
+  }
+
+  /**
+   * Compute DO/SKIP/CAUTION/OPTIONAL verdict for an activity
+   * against the current selected guests (or a provided guest list).
+   */
+  function activityVerdict(activity, guestIds) {
+    var benefit = 0, harm = 0;
+    guestIds.forEach(function (gId) {
+      if (!gId) return;
+      var guest = getGuest(gId);
+      if (!guest) return;
+      var pref = guest.preferences[activity.dim] || 0;
+      if (pref !== 0) {
+        if (Math.sign(pref) === Math.sign(activity.direction)) benefit++;
+        else harm++;
+      }
+    });
+    if (benefit > 0 && harm === 0) return { verdict: "do", benefit: benefit, harm: harm };
+    if (harm > 0 && benefit === 0) return { verdict: "skip", benefit: benefit, harm: harm };
+    if (benefit > 0 && harm > 0) return { verdict: "caution", benefit: benefit, harm: harm };
+    return { verdict: "optional", benefit: benefit, harm: harm };
+  }
+
+  /* ============================================================
      OPTIMIZER (brute-force)
      ============================================================ */
 
@@ -254,7 +314,7 @@ const App = (() => {
     // Recursive enumeration (4 levels deep)
     function enumerate(catIdx, current) {
       if (catIdx === cats.length) {
-        const score = totalHappiness(selectedGuests, current);
+        const score = totalHappiness(selectedGuests, current) + eventBonus(current, selectedGuests);
         if (score > bestScore) {
           bestScore = score;
           bestCombo = { ...current };
@@ -297,7 +357,7 @@ const App = (() => {
 
     function enumerate(catIdx, current) {
       if (catIdx === cats.length) {
-        const score = totalHappiness(guestIds, current);
+        const score = totalHappiness(guestIds, current) + eventBonus(current, guestIds);
         if (score > bestScore) {
           bestScore = score;
         }
@@ -681,6 +741,8 @@ const App = (() => {
       '<hr class="ec-divider">',
       renderResultsSection(),
       '<hr class="ec-divider">',
+      renderEventGuide(),
+      '<hr class="ec-divider">',
       renderRewardCollectionSection(),
     ].join("");
 
@@ -850,6 +912,226 @@ const App = (() => {
     return html;
   }
 
+  /* --- Event Guide Section --- */
+  function renderEventGuide() {
+    var activeGuests = selectedGuests.filter(function (g) { return g !== null; });
+    var hasAmenities = Object.values(selectedAmenities).some(function (a) { return a !== null; });
+
+    var html = '<section class="ec-section" id="event-guide-section">' +
+      '<div class="ec-section-header">' +
+      '<h2 class="ec-section-title">During the Court</h2>' +
+      '<span class="ec-section-badge">Event Playbook</span>' +
+      '</div>';
+
+    if (activeGuests.length === 0 || !hasAmenities) {
+      html += '<div class="results-empty">Select guests and amenities to see your event playbook.</div>';
+      html += '</section>';
+      return html;
+    }
+
+    // Amenity activities (Entertainment, Refreshment, Decoration only)
+    var hasActivities = false;
+    CATEGORIES.forEach(function (cat) {
+      var amenityId = selectedAmenities[cat.key];
+      if (!amenityId) return;
+      var amenity = getAmenity(amenityId);
+      if (!amenity || !amenity.activities || amenity.activities.length === 0) return;
+
+      hasActivities = true;
+      html += '<div class="event-category">';
+      html += '<div class="event-category-label">' + cat.label + ': ' + amenity.name + '</div>';
+      html += '<div class="event-activity-list">';
+
+      amenity.activities.forEach(function (activity) {
+        var vResult = activityVerdict(activity, selectedGuests);
+        var v = vResult.verdict;
+        var labels = DATA.dimensionLabels[activity.dim];
+        var effectLabel = activity.direction > 0 ? labels.positive : labels.negative;
+
+        var verdictIcon, verdictText;
+        if (v === "do") {
+          verdictIcon = "\u2713";
+          verdictText = "DO";
+        } else if (v === "skip") {
+          verdictIcon = "\u2717";
+          verdictText = "SKIP";
+        } else if (v === "caution") {
+          verdictIcon = "\u26A0";
+          verdictText = "" + vResult.benefit + " benefit, " + vResult.harm + " harmed";
+        } else {
+          verdictIcon = "\u2014";
+          verdictText = "OPTIONAL";
+        }
+
+        html += '<div class="event-activity ' + v + '">';
+        html += '<div class="event-verdict">';
+        html += '<span class="event-verdict-icon">' + verdictIcon + '</span>';
+        html += '<span class="event-verdict-text">' + verdictText + '</span>';
+        html += '</div>';
+        html += '<div class="event-activity-details">';
+        html += '<div class="event-activity-header">';
+        html += '<span class="event-activity-name">' + activity.name + '</span>';
+        html += '<span class="effect-tag dim-' + activity.dim + '">+' + effectLabel + '</span>';
+        if (activity.prepPhase) {
+          html += '<span class="event-prep-badge">Prep Phase</span>';
+        }
+        html += '</div>';
+        html += '<div class="event-activity-tip">' + activity.tip + '</div>';
+        if (activity.dualNature) {
+          html += '<div class="event-activity-note">\u26A1 ' + activity.dualNature + '</div>';
+        }
+        html += '</div>';
+        html += '</div>';
+      });
+
+      html += '</div></div>';
+    });
+
+    if (!hasActivities) {
+      html += '<div class="results-empty">Selected amenities have no in-event activities (Security provides base effects only).</div>';
+    }
+
+    // Random events
+    html += renderEventRandomSection();
+
+    // Party crashers
+    html += renderEventCrasherSection();
+
+    html += '</section>';
+    return html;
+  }
+
+  function renderEventRandomSection() {
+    var relevant = getRelevantRandomEvents();
+    if (relevant.length === 0) return "";
+
+    var html = '<div class="event-random-section">';
+    html += '<div class="event-category-label">Random Events <span class="event-subtext">2 may appear per party</span></div>';
+
+    relevant.forEach(function (evt) {
+      var rec = randomEventRecommendation(evt);
+      var labels = DATA.dimensionLabels[evt.dim];
+      var dimLabel = capitalize(evt.dim);
+
+      html += '<div class="event-random-item">';
+      html += '<div class="event-random-header">';
+      html += '<span class="event-random-name">' + evt.name + '</span>';
+      html += '<span class="effect-tag dim-' + evt.dim + '">' + dimLabel + '</span>';
+      html += '</div>';
+
+      if (rec.choice === "positive") {
+        html += '<div class="event-random-choice recommend">';
+        html += '<span class="event-verdict-icon do">\u2713</span> ';
+        html += '<strong>+' + labels.positive + ':</strong> ' + evt.positive;
+        html += '</div>';
+        html += '<div class="event-random-choice avoid">';
+        html += '<span class="event-verdict-icon skip">\u2717</span> ';
+        html += '+' + labels.negative + ': ' + evt.negative;
+        html += '</div>';
+      } else if (rec.choice === "negative") {
+        html += '<div class="event-random-choice avoid">';
+        html += '<span class="event-verdict-icon skip">\u2717</span> ';
+        html += '+' + labels.positive + ': ' + evt.positive;
+        html += '</div>';
+        html += '<div class="event-random-choice recommend">';
+        html += '<span class="event-verdict-icon do">\u2713</span> ';
+        html += '<strong>+' + labels.negative + ':</strong> ' + evt.negative;
+        html += '</div>';
+      } else {
+        // "either" -- both have supporters
+        html += '<div class="event-random-choice mixed">';
+        html += '<span class="event-verdict-icon caution">\u26A0</span> ';
+        html += '+' + labels.positive + ': ' + evt.positive + ' (' + rec.positive + ' guest' + (rec.positive !== 1 ? "s" : "") + ')';
+        html += '</div>';
+        html += '<div class="event-random-choice mixed">';
+        html += '<span class="event-verdict-icon caution">\u26A0</span> ';
+        html += '+' + labels.negative + ': ' + evt.negative + ' (' + rec.negative + ' guest' + (rec.negative !== 1 ? "s" : "") + ')';
+        html += '</div>';
+      }
+
+      html += '</div>';
+    });
+
+    html += '</div>';
+    return html;
+  }
+
+  function renderEventCrasherSection() {
+    var relevant = getRelevantPartyCrashers();
+    if (relevant.length === 0) return "";
+
+    var html = '<div class="event-crasher-section">';
+    html += '<div class="event-category-label">Party Crashers <span class="event-subtext">defeat for atmosphere boost</span></div>';
+
+    relevant.forEach(function (crasher) {
+      var labels = DATA.dimensionLabels[crasher.dim];
+      var effectLabel = crasher.direction > 0 ? labels.positive : labels.negative;
+
+      html += '<div class="event-crasher-item">';
+      html += '<span class="event-verdict-icon do">\u2713</span> ';
+      html += '<strong>' + crasher.boss + '</strong>';
+      html += ' (' + crasher.name + ')';
+      html += ' <span class="effect-tag dim-' + crasher.dim + '">+' + effectLabel + '</span>';
+      html += '</div>';
+    });
+
+    html += '</div>';
+    return html;
+  }
+
+  /**
+   * Get random events relevant to the current guest selection.
+   * A random event is relevant if at least one guest has a non-zero preference
+   * on its dimension.
+   */
+  function getRelevantRandomEvents() {
+    if (!DATA.randomEvents) return [];
+    return DATA.randomEvents.filter(function (evt) {
+      return selectedGuests.some(function (gId) {
+        if (!gId) return false;
+        var guest = getGuest(gId);
+        return guest && guest.preferences[evt.dim] !== 0;
+      });
+    });
+  }
+
+  /**
+   * Get party crashers relevant to the current guest selection.
+   * A crasher is relevant if at least one guest has a preference matching
+   * the crasher's dimension and direction.
+   */
+  function getRelevantPartyCrashers() {
+    if (!DATA.partyCrashers) return [];
+    return DATA.partyCrashers.filter(function (crasher) {
+      return selectedGuests.some(function (gId) {
+        if (!gId) return false;
+        var guest = getGuest(gId);
+        if (!guest) return false;
+        var pref = guest.preferences[crasher.dim] || 0;
+        return pref !== 0 && Math.sign(pref) === Math.sign(crasher.direction);
+      });
+    });
+  }
+
+  /**
+   * Compute which choice to recommend for a random event.
+   */
+  function randomEventRecommendation(evt) {
+    var pos = 0, neg = 0;
+    selectedGuests.forEach(function (gId) {
+      if (!gId) return;
+      var guest = getGuest(gId);
+      if (!guest) return;
+      var pref = guest.preferences[evt.dim] || 0;
+      if (pref > 0) pos++;
+      else if (pref < 0) neg++;
+    });
+    if (pos > neg) return { choice: "positive", positive: pos, negative: neg };
+    if (neg > pos) return { choice: "negative", positive: pos, negative: neg };
+    if (pos > 0) return { choice: "either", positive: pos, negative: neg };
+    return { choice: "none", positive: 0, negative: 0 };
+  }
+
   /* --- Reward Collection Section --- */
   function renderRewardCollectionSection() {
     var totalRewards = DATA.guests.reduce(function (sum, g) {
@@ -992,15 +1274,16 @@ const App = (() => {
           })
           .join("; ");
 
-        // Happiness delta display
+        // Happiness delta display (round to 1 decimal, strip trailing .0)
         let deltaClass = "delta-neutral";
         let deltaText = "0";
-        if (s.happinessDelta > 0) {
+        var roundedDelta = Math.round(s.happinessDelta * 10) / 10;
+        if (roundedDelta > 0) {
           deltaClass = "delta-positive";
-          deltaText = "+" + s.happinessDelta;
-        } else if (s.happinessDelta < 0) {
+          deltaText = "+" + (roundedDelta % 1 === 0 ? roundedDelta.toFixed(0) : roundedDelta.toFixed(1));
+        } else if (roundedDelta < 0) {
           deltaClass = "delta-negative";
-          deltaText = "" + s.happinessDelta;
+          deltaText = (roundedDelta % 1 === 0 ? roundedDelta.toFixed(0) : roundedDelta.toFixed(1));
         }
 
         const conflictWord2 = s.conflictsResolved === 1 ? "conflict" : "conflicts";
