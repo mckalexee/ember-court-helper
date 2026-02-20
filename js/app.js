@@ -100,6 +100,13 @@ const App = (() => {
     return "img/rewards/" + reward.id + ".jpg";
   }
 
+  function rewardIconWrap(reward, collected, innerHtml) {
+    var cls = "reward-icon-wrap rarity-" + (reward.rarity || "common");
+    if (reward.type === "transmog") cls += " type-transmog";
+    if (collected) cls += " collected";
+    return '<span class="' + cls + '">' + innerHtml + '</span>';
+  }
+
   function getCategoryIconPath(type) {
     return "img/rewards/" + type + "-category.jpg";
   }
@@ -865,7 +872,8 @@ const App = (() => {
       var collected = collectedRewards.has(r.id);
       var title = capitalize(r.type) + ": " + r.name + (collected ? " (Collected)" : "");
       var alt = capitalize(r.type) + ": " + r.name + (collected ? " (Collected)" : "");
-      html += '<img class="reward-icon' + (collected ? " collected" : "") + '" src="' + getRewardIconPath(r) + '" alt="' + alt + '" title="' + title + '">';
+      var img = '<img class="reward-icon' + (collected ? " collected" : "") + '" src="' + getRewardIconPath(r) + '" alt="' + alt + '" title="' + title + '">';
+      html += rewardIconWrap(r, collected, img);
     });
 
     if (allCollected) {
@@ -897,7 +905,7 @@ const App = (() => {
         : r.name;
       var typeLabel = '<span class="reward-row-type">' + capitalize(r.type) + '</span>';
       html += '<div class="reward-row' + (collected ? " collected" : "") + '">';
-      html += '<img class="reward-row-icon" src="' + getRewardIconPath(r) + '" alt="' + r.name + '" width="28" height="28">';
+      html += rewardIconWrap(r, collected, '<img class="reward-row-icon" src="' + getRewardIconPath(r) + '" alt="' + r.name + '" width="28" height="28">');
       html += '<span class="reward-row-name">' + typeLabel + ' ' + nameHtml + '</span>';
       html += r.requirement && r.requirement !== "Any"
         ? '<span class="reward-requirement">' + r.requirement + '</span>'
@@ -1174,7 +1182,7 @@ const App = (() => {
           ? '<a href="' + r.wowheadUrl + '" target="_blank" rel="noopener noreferrer" class="reward-wowhead-link">' + r.name + ' &#x2197;</a>'
           : r.name;
         html += '<div class="reward-collection-row' + (collected ? " collected" : "") + '">';
-        html += '<img class="reward-row-icon" src="' + getRewardIconPath(r) + '" alt="' + r.name + '" width="32" height="32">';
+        html += rewardIconWrap(r, collected, '<img class="reward-row-icon" src="' + getRewardIconPath(r) + '" alt="' + r.name + '" width="32" height="32">');
         html += '<span class="reward-collection-name">' + nameHtml + '</span>';
         html += '<span class="reward-collection-guest ' + fc + '">' + guest.name + '</span>';
         html += r.requirement && r.requirement !== "Any"

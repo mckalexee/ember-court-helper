@@ -4,6 +4,21 @@ A running log of features built for the Ember Court Calculator.
 
 ---
 
+## 008 -- Rarity Colors (2026-02-20)
+
+Added per-item rarity-colored borders to all reward icons throughout the UI,
+matching WoW's canonical item quality colors. All 44 rewards have individual
+rarity verified from Wowhead: 4 mounts (Epic purple), 8 pets (Uncommon green),
+1 toy (Rare blue), and 31 transmog with mixed rarities (13 Epic, 12 Rare, 6
+Uncommon). Transmog items also show pink L-shaped corner indicators at upper-
+right and bottom-left, resembling the in-game appearance/transmog UI. Borders
+increased from 1px to 2px for rarity visibility. Collected items dim both the
+icon and rarity indicators.
+
+Docs: `features/008-rarity-colors/`
+
+---
+
 ## 007 -- Event Mechanics (2026-02-20)
 
 Added an "During the Court" event playbook section that shows players exactly what

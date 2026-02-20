@@ -46,6 +46,15 @@
   --faction-nightfae: #8c6bbf;
   --faction-kyrian:   #5ba3d9;
 
+  /* Item rarity colours (WoW standard) */
+  --rarity-poor:      #9d9d9d;
+  --rarity-common:    #ffffff;
+  --rarity-uncommon:  #1eff00;
+  --rarity-rare:      #0070dd;
+  --rarity-epic:      #a335ee;
+  --rarity-legendary: #ff8000;
+  --transmog-corner:  #ff80c0;
+
   /* Borders & misc */
   --border-color:    #3d2a50;
   --border-radius:   6px;
@@ -1398,17 +1407,62 @@ body {
   width: 24px;
   height: 24px;
   border-radius: 4px;
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
   object-fit: cover;
   display: block;
   transition: opacity 0.2s, border-color 0.2s;
 }
-.reward-icon:hover {
-  border-color: var(--accent-gold);
-}
 .reward-icon.collected {
   opacity: 0.35;
   filter: grayscale(50%);
+}
+
+/* Reward icon wrapper for rarity borders & transmog corners */
+.reward-icon-wrap {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Rarity border colours (specificity must beat contextual selectors) */
+.reward-icon-wrap.rarity-uncommon > img { border-color: var(--rarity-uncommon); }
+.reward-icon-wrap.rarity-rare > img { border-color: var(--rarity-rare); }
+.reward-icon-wrap.rarity-epic > img { border-color: var(--rarity-epic); }
+.reward-icon-wrap.rarity-legendary > img { border-color: var(--rarity-legendary); }
+
+/* Transmog appearance corner indicators (L-shaped border overlays) */
+.reward-icon-wrap.type-transmog::before,
+.reward-icon-wrap.type-transmog::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  width: 38%;
+  height: 38%;
+}
+.reward-icon-wrap.type-transmog::before {
+  top: 0;
+  right: 0;
+  border-top: 3px solid var(--transmog-corner);
+  border-right: 3px solid var(--transmog-corner);
+}
+.reward-icon-wrap.type-transmog::after {
+  bottom: 0;
+  left: 0;
+  border-bottom: 3px solid var(--transmog-corner);
+  border-left: 3px solid var(--transmog-corner);
+}
+
+/* Dim rarity & corners on collected state */
+.reward-icon-wrap.collected::before,
+.reward-icon-wrap.collected::after,
+.reward-row.collected .reward-icon-wrap::before,
+.reward-row.collected .reward-icon-wrap::after,
+.reward-collection-row.collected .reward-icon-wrap::before,
+.reward-collection-row.collected .reward-icon-wrap::after {
+  opacity: 0.35;
 }
 
 .reward-icons-check {
@@ -1476,7 +1530,7 @@ body {
   width: 28px;
   height: 28px;
   border-radius: 4px;
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
   object-fit: cover;
   display: block;
 }
@@ -1627,7 +1681,7 @@ body {
   width: 32px;
   height: 32px;
   border-radius: 4px;
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
   object-fit: cover;
   display: block;
 }
@@ -1864,6 +1918,11 @@ body {
   .reward-icon {
     width: 20px;
     height: 20px;
+  }
+  .reward-icon-wrap.type-transmog::before,
+  .reward-icon-wrap.type-transmog::after {
+    width: 35%;
+    height: 35%;
   }
   .reward-row .reward-requirement {
     display: none;
