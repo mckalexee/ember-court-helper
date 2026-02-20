@@ -26,101 +26,160 @@ const EmberCourtData = Object.freeze({
     { id: "kassir", name: "Cryptkeeper Kassir", faction: "Venthyr", slot: 1,
       preferences: { cleanliness: 0, danger: 0, decadence: 0, excitement: 0, formality: 1 },
       rewards: [
-        { id: "kassir-tmog", type: "transmog", name: "Crypt Keeper's Mantle & Weapons" }
+        { id: "kassir-cloak", type: "transmog", name: "Kassir's Crypt Mantle",
+          wowheadUrl: "https://www.wowhead.com/item=183713", requirement: "Good Friend" },
+        { id: "kassir-staff", type: "transmog", name: "Crypt Watcher's Spire",
+          wowheadUrl: "https://www.wowhead.com/item=180954", requirement: "Any" }
       ] },
     { id: "marileth", name: "Plague Deviser Marileth", faction: "Necrolord", slot: 1,
       preferences: { cleanliness: -1, danger: 0, decadence: 0, excitement: 0, formality: 0 },
       rewards: [
-        { id: "marileth-tmog", type: "transmog", name: "Plagueborne Weapons" }
+        { id: "marileth-wand", type: "transmog", name: "Gem-Crowned Wand",
+          wowheadUrl: "https://www.wowhead.com/item=181321", requirement: "Any" },
+        { id: "marileth-staff", type: "transmog", name: "Blightclutched Greatstaff",
+          wowheadUrl: "https://www.wowhead.com/item=181323", requirement: "Any" }
       ] },
     { id: "choofa", name: "Choofa", faction: "Night Fae", slot: 1,
       preferences: { cleanliness: 0, danger: 0, decadence: 0, excitement: 1, formality: 0 },
       rewards: [
-        { id: "choofa-tmog", type: "transmog", name: "Ardenweald Weapons" }
+        { id: "choofa-dagger", type: "transmog", name: "Nightwillow Barb",
+          wowheadUrl: "https://www.wowhead.com/item=179499", requirement: "Any" },
+        { id: "choofa-offhand", type: "transmog", name: "Heartwood Stem",
+          wowheadUrl: "https://www.wowhead.com/item=179563", requirement: "Any" }
       ] },
     { id: "sika", name: "Sika", faction: "Kyrian", slot: 1,
       preferences: { cleanliness: 1, danger: 0, decadence: 0, excitement: 0, formality: 0 },
       rewards: [
-        { id: "sika-pet", type: "pet", name: "Brightscale Hatchling" },
-        { id: "sika-tmog", type: "transmog", name: "Kyrian Weapons" }
+        { id: "sika-pet", type: "pet", name: "Brightscale Hatchling",
+          wowheadUrl: "https://www.wowhead.com/item=180815", requirement: "Good Friend" },
+        { id: "sika-offhand", type: "transmog", name: "Tranquil's Censer",
+          wowheadUrl: "https://www.wowhead.com/item=181229", requirement: "Any" }
       ] },
 
     // --- Slot 2 (Tier 2): 1 preference each ---
     { id: "stonehead", name: "Stonehead", faction: "Venthyr", slot: 2,
       preferences: { cleanliness: 0, danger: 0, decadence: 0, excitement: 0, formality: -1 },
       rewards: [
-        { id: "stonehead-pet", type: "pet", name: "Violet Dredwing Pup" },
-        { id: "stonehead-tmog", type: "transmog", name: "Bronze-Bound Sinstone & Weapons" }
+        { id: "stonehead-pet", type: "pet", name: "Violet Dredwing Pup",
+          wowheadUrl: "https://www.wowhead.com/item=180603", requirement: "Best Friend" },
+        { id: "stonehead-cloak", type: "transmog", name: "Bronze-Bound Sinstone",
+          wowheadUrl: "https://www.wowhead.com/item=183709", requirement: "Good Friend" },
+        { id: "stonehead-polearm", type: "transmog", name: "Stonewing Halberd",
+          wowheadUrl: "https://www.wowhead.com/item=180955", requirement: "Any" }
       ] },
     { id: "aliothe", name: "Droman Aliothe", faction: "Night Fae", slot: 2,
       preferences: { cleanliness: 0, danger: 0, decadence: 0, excitement: -1, formality: 0 },
       rewards: [
-        { id: "aliothe-pet", type: "pet", name: "Pearlwing Heron" },
-        { id: "aliothe-tmog", type: "transmog", name: "Ardenweald Weapons" }
+        { id: "aliothe-pet", type: "pet", name: "Pearlwing Heron",
+          wowheadUrl: "https://www.wowhead.com/item=180628", requirement: "Best Friend" },
+        { id: "aliothe-sword", type: "transmog", name: "Ripvine Saber",
+          wowheadUrl: "https://www.wowhead.com/item=179514", requirement: "Any" },
+        { id: "aliothe-maul", type: "transmog", name: "Grove Warden's Maul",
+          wowheadUrl: "https://www.wowhead.com/item=179538", requirement: "Any" }
       ] },
     { id: "vole", name: "Grandmaster Vole", faction: "Necrolord", slot: 2,
       preferences: { cleanliness: 0, danger: 1, decadence: 0, excitement: 0, formality: 0 },
       rewards: [
-        { id: "vole-pet", type: "pet", name: "Corpulent Bonetusk" },
-        { id: "vole-tmog", type: "transmog", name: "Maldraxxian Weapons" }
+        { id: "vole-pet", type: "pet", name: "Corpulent Bonetusk",
+          wowheadUrl: "https://www.wowhead.com/item=181168", requirement: "Good Friend" },
+        { id: "vole-sword", type: "transmog", name: "Marrowfused Sword",
+          wowheadUrl: "https://www.wowhead.com/item=181328", requirement: "Any" },
+        { id: "vole-claymore", type: "transmog", name: "Marrowfused Claymore",
+          wowheadUrl: "https://www.wowhead.com/item=181329", requirement: "Any" }
       ] },
     { id: "kleia", name: "Kleia & Pelagos", faction: "Kyrian", slot: 2,
       preferences: { cleanliness: 0, danger: 0, decadence: -1, excitement: 0, formality: 0 },
       rewards: [
-        { id: "kleia-pet", type: "pet", name: "Sable" },
-        { id: "kleia-tmog", type: "transmog", name: "Kyrian Weapons" }
+        { id: "kleia-pet", type: "pet", name: "Sable",
+          wowheadUrl: "https://www.wowhead.com/item=180814", requirement: "Best Friend" },
+        { id: "kleia-crossbow", type: "transmog", name: "Crossbow of Contemplative Calm",
+          wowheadUrl: "https://www.wowhead.com/item=181225", requirement: "Any" },
+        { id: "kleia-glaive", type: "transmog", name: "Bronze Dual-Bladed Glaive",
+          wowheadUrl: "https://www.wowhead.com/item=181226", requirement: "Any" }
       ] },
 
     // --- Slot 3 (Tier 3): 2 preferences each ---
     { id: "rendle", name: "Rendle & Cudgelface", faction: "Venthyr", slot: 3,
       preferences: { cleanliness: -1, danger: 0, decadence: 0, excitement: -1, formality: 0 },
       rewards: [
-        { id: "rendle-pet", type: "pet", name: "Bloodfeaster Spiderling" },
-        { id: "rendle-tmog", type: "transmog", name: "Revendreth Weapons" }
+        { id: "rendle-pet", type: "pet", name: "Bloodfeaster Spiderling",
+          wowheadUrl: "https://www.wowhead.com/item=181315", requirement: "Any" },
+        { id: "rendle-dagger", type: "transmog", name: "Dredger Anklebiter",
+          wowheadUrl: "https://www.wowhead.com/item=180959", requirement: "Any" },
+        { id: "rendle-mace", type: "transmog", name: "Sterling-Silver Cudgel",
+          wowheadUrl: "https://www.wowhead.com/item=180962", requirement: "Any" }
       ] },
     { id: "mograine", name: "Alexandros Mograine", faction: "Necrolord", slot: 3,
       preferences: { cleanliness: 0, danger: -1, decadence: -1, excitement: 0, formality: 0 },
       rewards: [
-        { id: "mograine-mount", type: "mount", name: "Gruesome Flayedwing" },
-        { id: "mograine-tmog", type: "transmog", name: "Maldraxxian Weapons" }
+        { id: "mograine-mount", type: "mount", name: "Gruesome Flayedwing",
+          wowheadUrl: "https://www.wowhead.com/item=181300", requirement: "Any" },
+        { id: "mograine-dagger", type: "transmog", name: "Marrowfused Dagger",
+          wowheadUrl: "https://www.wowhead.com/item=181325", requirement: "Any" },
+        { id: "mograine-shield", type: "transmog", name: "Marrowfused Shield",
+          wowheadUrl: "https://www.wowhead.com/item=181331", requirement: "Any" }
       ] },
     { id: "korayn", name: "Hunt-Captain Korayn", faction: "Night Fae", slot: 3,
       preferences: { cleanliness: 0, danger: 1, decadence: 0, excitement: 0, formality: -1 },
       rewards: [
-        { id: "korayn-mount", type: "mount", name: "Pale Acidmaw" },
-        { id: "korayn-tmog", type: "transmog", name: "Night Fae Weapons" }
+        { id: "korayn-mount", type: "mount", name: "Pale Acidmaw",
+          wowheadUrl: "https://www.wowhead.com/item=180726", requirement: "Best Friend" },
+        { id: "korayn-glaive", type: "transmog", name: "Grove Warden's Edge",
+          wowheadUrl: "https://www.wowhead.com/item=179509", requirement: "Any" },
+        { id: "korayn-bow", type: "transmog", name: "Nightwillow Shortbow",
+          wowheadUrl: "https://www.wowhead.com/item=179585", requirement: "Any" }
       ] },
     { id: "adrestes", name: "Polemarch Adrestes", faction: "Kyrian", slot: 3,
       preferences: { cleanliness: 1, danger: 0, decadence: 0, excitement: 0, formality: 1 },
       rewards: [
-        { id: "adrestes-tmog", type: "transmog", name: "Kyrian Weapons" }
+        { id: "adrestes-shoulders", type: "transmog", name: "Stalwart Pauldron of Resolve",
+          wowheadUrl: "https://www.wowhead.com/item=178897", requirement: "Any" },
+        { id: "adrestes-axe", type: "transmog", name: "Broadbladed Severer",
+          wowheadUrl: "https://www.wowhead.com/item=181231", requirement: "Any" },
+        { id: "adrestes-polearm", type: "transmog", name: "Temple Guard's Partisan",
+          wowheadUrl: "https://www.wowhead.com/item=181228", requirement: "Any" }
       ] },
 
     // --- Slot 4 (Tier 4): 3 preferences each ---
     { id: "countess", name: "The Countess", faction: "Venthyr", slot: 4,
       preferences: { cleanliness: 0, danger: 0, decadence: 1, excitement: -1, formality: 1 },
       rewards: [
-        { id: "countess-mount", type: "mount", name: "Desire's Battle Gargon" },
-        { id: "countess-toy", type: "toy", name: "The Countess's Parasol" },
-        { id: "countess-tmog", type: "transmog", name: "Venthyr Weapons" }
+        { id: "countess-mount", type: "mount", name: "Desire's Battle Gargon",
+          wowheadUrl: "https://www.wowhead.com/item=182209", requirement: "Best Friend" },
+        { id: "countess-toy", type: "toy", name: "The Countess's Parasol",
+          wowheadUrl: "https://www.wowhead.com/item=182696", requirement: "Any" },
+        { id: "countess-sword", type: "transmog", name: "Redelev House Foil",
+          wowheadUrl: "https://www.wowhead.com/item=180958", requirement: "Any" },
+        { id: "countess-dagger", type: "transmog", name: "Silver-Bladed Ritual Dagger",
+          wowheadUrl: "https://www.wowhead.com/item=180961", requirement: "Any" }
       ] },
     { id: "vashj", name: "Baroness Vashj", faction: "Necrolord", slot: 4,
       preferences: { cleanliness: 0, danger: 1, decadence: 1, excitement: 1, formality: 0 },
       rewards: [
-        { id: "vashj-pet", type: "pet", name: "Plaguelouse Larva" },
-        { id: "vashj-tmog", type: "transmog", name: "Maldraxxian Weapons" }
+        { id: "vashj-pet", type: "pet", name: "Plaguelouse Larva",
+          wowheadUrl: "https://www.wowhead.com/item=181264", requirement: "Best Friend" },
+        { id: "vashj-crossbow", type: "transmog", name: "Bonejowl Ballista",
+          wowheadUrl: "https://www.wowhead.com/item=181320", requirement: "Any" },
+        { id: "vashj-tome", type: "transmog", name: "Bonebound Tome",
+          wowheadUrl: "https://www.wowhead.com/item=181322", requirement: "Any" }
       ] },
     { id: "moonberry", name: "Lady Moonberry", faction: "Night Fae", slot: 4,
       preferences: { cleanliness: -1, danger: 0, decadence: 0, excitement: 1, formality: -1 },
       rewards: [
-        { id: "moonberry-pet", type: "pet", name: "Dusty Sporeflutterer" },
-        { id: "moonberry-tmog", type: "transmog", name: "Ardenweald Weapons" }
+        { id: "moonberry-pet", type: "pet", name: "Dusty Sporeflutterer",
+          wowheadUrl: "https://www.wowhead.com/item=180639", requirement: "Good Friend" },
+        { id: "moonberry-staff", type: "transmog", name: "Songwood Staff",
+          wowheadUrl: "https://www.wowhead.com/item=179516", requirement: "Any" }
       ] },
     { id: "mikanikos", name: "Mikanikos", faction: "Kyrian", slot: 4,
       preferences: { cleanliness: 1, danger: -1, decadence: -1, excitement: 0, formality: 0 },
       rewards: [
-        { id: "mikanikos-mount", type: "mount", name: "Dauntless Duskrunner" },
-        { id: "mikanikos-tmog", type: "transmog", name: "Kyrian Weapons" }
+        { id: "mikanikos-mount", type: "mount", name: "Dauntless Duskrunner",
+          wowheadUrl: "https://www.wowhead.com/item=181317", requirement: "Best Friend" },
+        { id: "mikanikos-shield", type: "transmog", name: "Bronze Ceremonial Targe",
+          wowheadUrl: "https://www.wowhead.com/item=181227", requirement: "Any" },
+        { id: "mikanikos-gavel", type: "transmog", name: "Final Arbiter's Gavel",
+          wowheadUrl: "https://www.wowhead.com/item=181235", requirement: "Any" }
       ] }
   ],
 

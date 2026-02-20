@@ -97,9 +97,6 @@ const App = (() => {
   ];
 
   function getRewardIconPath(reward) {
-    if (reward.type === "transmog") {
-      return "img/rewards/transmog.jpg";
-    }
     return "img/rewards/" + reward.id + ".jpg";
   }
 
@@ -823,10 +820,16 @@ const App = (() => {
 
     rewards.forEach(function (r) {
       var collected = collectedRewards.has(r.id);
+      var nameHtml = r.wowheadUrl
+        ? '<a href="' + r.wowheadUrl + '" target="_blank" rel="noopener noreferrer" class="reward-wowhead-link">' + r.name + ' &#x2197;</a>'
+        : r.name;
+      var reqHtml = r.requirement && r.requirement !== "Any"
+        ? '<span class="reward-requirement">' + r.requirement + '</span>'
+        : '';
       html += '<div class="reward-row' + (collected ? " collected" : "") + '">';
       html += '<img class="reward-row-icon" src="' + getRewardIconPath(r) + '" alt="' + r.name + '" width="28" height="28">';
-      html += '<span class="reward-row-type">' + capitalize(r.type) + '</span>';
-      html += '<span class="reward-row-name">' + r.name + '</span>';
+      html += '<span class="reward-row-type">' + capitalize(r.type) + reqHtml + '</span>';
+      html += '<span class="reward-row-name">' + nameHtml + '</span>';
       html += '<button class="reward-collect-btn" data-reward="' + r.id + '" role="checkbox" aria-checked="' + collected + '" aria-label="' + (collected ? "Unmark " : "Mark ") + r.name + ' as collected" tabindex="0">';
       html += '<span class="reward-checkbox"></span>';
       html += '</button>';
@@ -875,11 +878,16 @@ const App = (() => {
         var guest = entry.guest;
         var collected = collectedRewards.has(r.id);
         var fc = factionClass(guest.faction);
-
+        var nameHtml = r.wowheadUrl
+          ? '<a href="' + r.wowheadUrl + '" target="_blank" rel="noopener noreferrer" class="reward-wowhead-link">' + r.name + ' &#x2197;</a>'
+          : r.name;
         html += '<div class="reward-collection-row' + (collected ? " collected" : "") + '">';
         html += '<img class="reward-row-icon" src="' + getRewardIconPath(r) + '" alt="' + r.name + '" width="32" height="32">';
-        html += '<span class="reward-collection-name">' + r.name + '</span>';
+        html += '<span class="reward-collection-name">' + nameHtml + '</span>';
         html += '<span class="reward-collection-guest ' + fc + '">' + guest.name + '</span>';
+        html += r.requirement && r.requirement !== "Any"
+          ? '<span class="reward-requirement">' + r.requirement + '</span>'
+          : '<span></span>';
         html += '<button class="reward-collect-btn" data-reward="' + r.id + '" role="checkbox" aria-checked="' + collected + '" aria-label="Mark ' + r.name + ' as collected" tabindex="0">';
         html += '<span class="reward-checkbox"></span>';
         html += '</button>';
