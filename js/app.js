@@ -30,8 +30,8 @@ const App = (() => {
   // Set of slot indices the user has locked (persisted to localStorage)
   let lockedSlots = new Set();
 
-  // Set of amenity IDs the user has NOT unlocked (persisted to localStorage)
-  let lockedAmenities = new Set();
+  // Set of amenity IDs not yet unlocked in-game (persisted to localStorage)
+  let unavailableAmenities = new Set();
 
   // Computed on every render -- not persisted
   let activeConflicts = [];
@@ -243,7 +243,7 @@ const App = (() => {
     const cats = CATEGORIES.map((c) => c.key);
     const optionsPerCat = cats.map((cat) => {
       const available = getAmenitiesByCategory(cat).filter(
-        (a) => !lockedAmenities.has(a.id)
+        (a) => !unavailableAmenities.has(a.id)
       );
       return available.length > 0 ? available : [{ id: null }];
     });
@@ -288,7 +288,7 @@ const App = (() => {
     const cats = CATEGORIES.map((c) => c.key);
     const optionsPerCat = cats.map((cat) => {
       const available = getAmenitiesByCategory(cat).filter(
-        (a) => !lockedAmenities.has(a.id)
+        (a) => !unavailableAmenities.has(a.id)
       );
       return available.length > 0 ? available : [{ id: null }];
     });
@@ -463,7 +463,7 @@ const App = (() => {
         selectedGuests,
         selectedAmenities,
         lockedSlots: Array.from(lockedSlots),
-        lockedAmenities: Array.from(lockedAmenities),
+        unavailableAmenities: Array.from(unavailableAmenities),
         collectedRewards: Array.from(collectedRewards),
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -501,8 +501,13 @@ const App = (() => {
       if (Array.isArray(state.lockedSlots)) {
         lockedSlots = new Set(state.lockedSlots);
       }
-      if (Array.isArray(state.lockedAmenities)) {
-        lockedAmenities = new Set(state.lockedAmenities);
+      // Migration: lockedAmenities -> unavailableAmenities
+      if (Array.isArray(state.lockedAmenities) && state.lockedAmenities.length > 0 && !Array.isArray(state.unavailableAmenities)) {
+        unavailableAmenities = new Set(state.lockedAmenities);
+        saveState();
+      }
+      if (Array.isArray(state.unavailableAmenities)) {
+        unavailableAmenities = new Set(state.unavailableAmenities);
       }
       if (Array.isArray(state.collectedRewards)) {
         collectedRewards = new Set(state.collectedRewards);
@@ -521,7 +526,7 @@ const App = (() => {
       security: null,
     };
     lockedSlots = new Set();
-    lockedAmenities = new Set();
+    unavailableAmenities = new Set();
     showingSuggestions = false;
     replacementSuggestions = [];
     expandedRewardGuest = null;
@@ -550,7 +555,7 @@ const App = (() => {
   }
 
   function handleAmenityClick(category, amenityId) {
-    if (lockedAmenities.has(amenityId)) return;
+    if (unavailableAmenities.has(amenityId)) return;
     if (selectedAmenities[category] === amenityId) {
       // Deselect
       selectedAmenities[category] = null;
@@ -561,11 +566,11 @@ const App = (() => {
     render();
   }
 
-  function handleAmenityLockToggle(amenityId) {
-    if (lockedAmenities.has(amenityId)) {
-      lockedAmenities.delete(amenityId);
+  function handleAmenityAvailabilityToggle(amenityId) {
+    if (unavailableAmenities.has(amenityId)) {
+      unavailableAmenities.delete(amenityId);
     } else {
-      lockedAmenities.add(amenityId);
+      unavailableAmenities.add(amenityId);
       // Deselect if currently selected
       const amenity = DATA.amenities.find(function (a) { return a.id === amenityId; });
       if (amenity && selectedAmenities[amenity.category] === amenityId) {
@@ -1032,14 +1037,14 @@ const App = (() => {
   function renderAmenitySection() {
     const hasGuests = selectedGuests.some((g) => g !== null);
     const totalAmenityCount = DATA.amenities.length;
-    const unlockedCount = totalAmenityCount - lockedAmenities.size;
-    const hasLocked = lockedAmenities.size > 0;
+    const availableCount = totalAmenityCount - unavailableAmenities.size;
+    const hasUnavailable = unavailableAmenities.size > 0;
 
     let html = `
       <section class="ec-section" id="amenity-section">
         <div class="ec-section-header">
           <h2 class="ec-section-title">Amenity Selection</h2>
-          ${hasLocked ? '<span class="ec-section-badge">' + unlockedCount + ' / ' + totalAmenityCount + ' Unlocked</span>' : ""}
+          ${hasUnavailable ? '<span class="ec-section-badge">' + availableCount + ' / ' + totalAmenityCount + ' Available</span>' : ""}
         </div>`;
 
     if (!hasGuests) {
@@ -1060,7 +1065,7 @@ const App = (() => {
 
       options.forEach((amenity) => {
         const isSelected = selectedAmenities[cat.key] === amenity.id;
-        const isLocked = lockedAmenities.has(amenity.id);
+        const isUnavailable = unavailableAmenities.has(amenity.id);
         const effectTags = amenityEffectTags(amenity);
         const impact = hasGuests ? amenityImpactForGuests(amenity) : 0;
         let impactClass = "impact-neutral";
@@ -1070,32 +1075,32 @@ const App = (() => {
           impactText = impact > 0 ? "+" + impact : "" + impact;
         }
 
-        // Lock toggle (shown on every chip)
-        const lockToggleHtml = '<div class="amenity-lock-toggle' + (isLocked ? " locked" : "") + '"'
+        // Availability toggle (shown on every chip)
+        const toggleHtml = '<div class="amenity-toggle' + (isUnavailable ? "" : " available") + '"'
           + ' data-amenity="' + amenity.id + '"'
-          + ' role="checkbox" aria-checked="' + isLocked + '"'
-          + ' aria-label="' + (isLocked ? "Unlock" : "Lock") + " " + amenity.name + '"'
+          + ' role="switch" aria-checked="' + !isUnavailable + '"'
+          + ' aria-label="' + amenity.name + ' availability"'
           + ' tabindex="0"'
-          + ' title="' + (isLocked ? "Locked -- click to unlock" : "Click to lock -- locked amenities are excluded from the optimizer") + '">'
-          + (isLocked ? LOCK_CLOSED_SVG : LOCK_OPEN_SVG)
+          + ' title="' + (isUnavailable ? "Not yet unlocked -- click to mark as available" : "Available -- click to mark as not yet unlocked") + '">'
+          + '<span class="amenity-toggle-thumb"></span>'
           + "</div>";
 
-        // Unlock info (only shown when locked)
+        // Unlock info (only shown when unavailable)
         let unlockInfoHtml = "";
-        if (isLocked && amenity.unlock) {
+        if (isUnavailable && amenity.unlock) {
           unlockInfoHtml = '<div class="amenity-unlock-info">'
             + '<span class="unlock-req-text">' + amenity.unlock.requirement + "</span>"
             + '<a href="' + amenity.unlock.wowheadUrl + '" target="_blank" rel="noopener noreferrer" class="unlock-wowhead-link">Wowhead &#x2197;</a>'
             + "</div>";
         }
 
-        const chipClasses = "amenity-chip" + (isSelected ? " selected" : "") + (isLocked ? " locked" : "");
+        const chipClasses = "amenity-chip" + (isSelected ? " selected" : "") + (isUnavailable ? " unavailable" : "");
 
         html += `
             <div class="${chipClasses}"
                  data-category="${cat.key}" data-amenity="${amenity.id}"
                  role="radio" aria-checked="${isSelected}" tabindex="0">
-              ${lockToggleHtml}
+              ${toggleHtml}
               <div class="amenity-name">${amenity.name}</div>
               <div class="amenity-effects">
                 ${effectTags
@@ -1105,7 +1110,7 @@ const App = (() => {
                   )
                   .join("")}
               </div>
-              ${!isLocked && hasGuests ? '<div class="amenity-impact ' + impactClass + '">' + (impactText || "\u2014") + "</div>" : ""}
+              ${!isUnavailable && hasGuests ? '<div class="amenity-impact ' + impactClass + '">' + (impactText || "\u2014") + "</div>" : ""}
               ${unlockInfoHtml}
             </div>`;
       });
@@ -1386,18 +1391,18 @@ const App = (() => {
       });
     });
 
-    // Amenity lock toggles (must be bound BEFORE amenity chips so stopPropagation works)
-    root.querySelectorAll(".amenity-lock-toggle").forEach((lockEl) => {
-      var lockHandler = function (e) {
+    // Amenity availability toggles (must be bound BEFORE amenity chips so stopPropagation works)
+    root.querySelectorAll(".amenity-toggle").forEach((toggleEl) => {
+      var toggleHandler = function (e) {
         e.stopPropagation(); // Don't toggle amenity selection
-        var amenityId = lockEl.dataset.amenity;
-        handleAmenityLockToggle(amenityId);
+        var amenityId = toggleEl.dataset.amenity;
+        handleAmenityAvailabilityToggle(amenityId);
       };
-      lockEl.addEventListener("click", lockHandler);
-      lockEl.addEventListener("keydown", function (e) {
+      toggleEl.addEventListener("click", toggleHandler);
+      toggleEl.addEventListener("keydown", function (e) {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          lockHandler(e);
+          toggleHandler(e);
         }
       });
     });
