@@ -17,13 +17,16 @@ ember-calculator/
   index.html          Entry point. Loads Google Fonts (Cinzel), css/styles.css, js/data.js, js/app.js.
   package.json        Metadata only. Scripts: "dev" and "start" both run `npx serve . -l 3000`.
   .gitignore          Ignores node_modules/, .DS_Store, Thumbs.db, *.log.
-  research.md         Detailed game data research (sources, mechanics, full tables).
   CLAUDE.md           This file.
   css/
     styles.css        All styles. CSS custom properties for theming. Responsive breakpoints at 1023px, 640px, 400px.
   js/
     data.js           Game data. Defines frozen global `EmberCourtData`. Must load before app.js.
     app.js            Application logic. IIFE pattern exposing `App` module with single public method `init()`.
+  docs/
+    changelog.md      Feature history log (reverse-chronological).
+    _template/        Skeleton research.md and design.md for new features.
+    features/         One subfolder per feature (NNN-name/) with research + design docs.
 ```
 
 ### Load Order
@@ -167,7 +170,7 @@ There is no build step, no compilation, no transpilation.
 - **5 atmosphere dimensions**: Cleanliness (Messy/Clean), Danger (Safe/Dangerous), Decadence (Humble/Decadent), Excitement (Relaxing/Exciting), Formality (Casual/Formal).
 - Each amenity affects exactly 2 dimensions (+1 or -1 each).
 - Each guest has 1-3 non-zero preferences (+1 or -1).
-- Detailed research, synergy tables, and source links are in `research.md`.
+- Detailed research, synergy tables, and source links are in `docs/features/001-initial-calculator/research.md`.
 
 ## 8. Common Tasks
 
@@ -192,3 +195,28 @@ Modify `optimize()` in `js/app.js` (around line 180). Currently brute-forces all
 1. Add amenities with the new category key to `EmberCourtData.amenities` in `js/data.js`.
 2. Add the category to the `CATEGORIES` array in `js/app.js` (around line 51).
 3. Add the category key with `null` default to `selectedAmenities` initialization and `resetAll()` in `js/app.js`.
+
+## 9. Documentation & Feature Workflow
+
+This is a Claude-powered repo. Features are developed by agent teams that produce research and design docs before implementation.
+
+### Starting a New Feature
+
+1. Check `docs/features/` for the highest existing number.
+2. Create `docs/features/NNN-short-name/` (3-digit zero-padded, kebab-case name).
+3. Copy files from `docs/_template/` into the new folder.
+4. Research phase: fill in `research.md` with findings, data, sources.
+5. Design phase: fill in `design.md` with UX, data model, algorithm, implementation plan.
+6. Implementation phase: build the feature following the design doc.
+7. After implementation: add an entry to `docs/changelog.md` and update this file if architecture changed.
+
+### Feature Folder Convention
+
+- Format: `NNN-short-kebab-case-name` (e.g., `003-guest-tooltips`)
+- Each folder has `research.md` and/or `design.md` (not every feature needs both)
+- Additional docs allowed with descriptive names (e.g., `analysis.md`, `alternatives.md`)
+- Docs are permanent artifacts -- do not delete after implementation
+
+### Changelog
+
+`docs/changelog.md` is a reverse-chronological log of shipped features. Each entry has the date, feature number, and a brief description.
