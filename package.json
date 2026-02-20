@@ -1,0 +1,12 @@
+{
+  "name": "ember-court-calculator",
+  "version": "0.1.0",
+  "description": "Calculator and optimizer for the Ember Court feature in World of Warcraft",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve . -l 3000",
+    "start": "npx serve . -l 3000"
+  },
+  "keywords": ["wow", "ember-court", "calculator", "venthyr"],
+  "license": "MIT"
+}
